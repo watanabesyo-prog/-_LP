@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bot一体型LP UIパターン案 v10｜HDXセルバンク（精子凍結みらいバンク）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* document chrome */
+  --paper:#EDF2F7; --ink:#24303B; --sub:#47555F; --line:#D2DDE6; --card:#FFFFFF;
+  --mark:#D96C2C; --mark-soft:#FBEDE2;
+  /* LP palette (miraifamily.jp) */
+  --teal:#3D74AE;          /* primary blue (buttons/user accents) */
+  --teal-deep:#2A5A8C;
+  --teal-ink:#173553;      /* navy headings / doc header */
+  --bl:#4A80BE;            /* speech bubble blue */
+  --ice:#E9F2F9;           /* sky panel */
+  --ice-soft:#F4F9FD;
+  --sky2:#CFE3F2;
+  --grn:#52BD51;           /* LINE green (LP tone) */
+  --org:#F39420;           /* オススメ! orange */
+  --amber:#B4690E; --amber-soft:#FFF3E0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{background:var(--paper);color:var(--ink);font-family:'Noto Sans JP',"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+.wrap{max-width:1280px;margin:0 auto;padding:0 40px}
+@media(max-width:760px){.wrap{padding:0 20px}}
+
+/* ===== document header ===== */
+.doc-head{background:var(--teal-ink);color:#EAF1F7;padding:56px 0 48px}
+.doc-head .kicker{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;color:#8FB4D6;display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.doc-head .kicker b{color:#F3B27F;font-weight:600}
+.doc-head h1{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:clamp(28px,4vw,44px);line-height:1.3;letter-spacing:.01em}
+.doc-head h1 small{display:block;font-size:.4em;font-weight:700;color:#9CBCD9;margin-top:10px;letter-spacing:.06em}
+.doc-head .lead{max-width:880px;margin-top:22px;font-size:14px;color:#C6D8E8}
+.doc-head .lead b{color:#fff}
+.meta-row{display:flex;gap:28px;flex-wrap:wrap;margin-top:26px;padding-top:20px;border-top:1px solid rgba(255,255,255,.16)}
+.meta-row div{font-size:12px;color:#9CBCD9}
+.meta-row div b{display:block;color:#EAF1F7;font-size:13px;font-weight:500;margin-top:2px}
+
+/* ===== flow / routes / leak ===== */
+.leak{padding:44px 0 8px}
+.routebox{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px 16px;margin:16px 0 10px}
+.routebox .rt{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0}
+.routebox .rt + .rt{border-top:1px dashed var(--line)}
+.rtag{flex-shrink:0;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.08em;color:#fff;border-radius:6px;padding:4px 10px}
+.rtag.a{background:var(--teal)}
+.rtag.b{background:var(--org)}
+.flowchips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.fchip{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:5px 9px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--sub);white-space:nowrap}
+.fchip b{color:var(--ink);font-weight:600}
+.fchip.hl{border-color:#A9C6E4;background:var(--ice-soft)}
+.fchip.hlb{border-color:#F0C08C;background:#FDF6EC}
+.farrow{color:#B6C4D0;font-size:11px}
+.leakgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+@media(max-width:900px){.leakgrid{grid-template-columns:1fr}}
+.leakcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 18px 16px;position:relative}
+.leakcard .zn{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mark);font-weight:600;letter-spacing:.08em}
+.leakcard h4{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;font-size:15px;margin:4px 0 6px}
+.leakcard .fact{font-size:12.5px;color:#3D4B56}
+.leakcard .fact b{color:var(--mark);font-weight:700}
+.leakcard .fix{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:12.5px}
+.leakcard .fix b{color:var(--teal)}
+
+/* ===== sections ===== */
+.sec{padding:52px 0 26px}
+.sec-head{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;border-top:2px solid var(--ink);padding-top:16px}
+.sec-head .no{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.14em;color:var(--mark)}
+.sec-head h2{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:clamp(20px,2.6vw,27px);letter-spacing:.01em}
+.sec-head .tag{font-size:11.5px;color:var(--sub);background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px 12px}
+.sec-lead{max-width:920px;font-size:14px;color:#333F4A;margin-top:10px;line-height:1.9}
+.sec-lead b{color:var(--ink)}
+
+/* ===== device rows ===== */
+.row{display:flex;gap:30px;align-items:flex-start;overflow-x:auto;padding:30px 4px 14px;scroll-snap-type:x proximity}
+.row::-webkit-scrollbar{height:8px}
+.row::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+.unit{flex:0 0 auto;width:312px;scroll-snap-align:start;position:relative}
+.corner{position:absolute;top:-11px;right:8px;z-index:3;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;font-size:11px;color:#fff;padding:4px 12px;border-radius:999px;box-shadow:0 2px 6px rgba(23,53,83,.25)}
+.corner.teal{background:var(--teal)}
+.corner.mark{background:var(--mark)}
+.corner.gray{background:#7C8D92}
+.corner.orgc{background:var(--org)}
+
+.device{width:312px;background:#1C2733;border-radius:44px;padding:9px;box-shadow:0 18px 40px -18px rgba(23,53,83,.45),0 2px 6px rgba(23,53,83,.18)}
+.scr{background:var(--card);border-radius:36px;overflow:hidden;display:flex;flex-direction:column;height:604px;position:relative}
+.scr.h640{height:664px}.scr.h700{height:700px}.scr.h780{height:784px}.scr.h860{height:940px}
+.statusbar{display:flex;justify-content:space-between;align-items:center;padding:10px 22px 4px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:#9AA9B6}
+.appbar{display:flex;align-items:center;gap:8px;padding:8px 16px 10px;border-bottom:1px solid #EAF0F5}
+.appbar .avmark{width:22px;height:22px;border-radius:50%;background:var(--bl);flex-shrink:0;overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
+.appbar .t{font-family:'Zen Maru Gothic',sans-serif;font-size:12px;font-weight:900;letter-spacing:.01em;color:var(--teal-ink)}
+.rmark{font-style:normal;font-size:7px;vertical-align:super;font-weight:700}
+.appbar .x{margin-left:auto;color:#B9C6D1;font-size:15px}
+.favt{width:88%;height:88%;display:block}
+
+/* progress */
+.prog{display:flex;align-items:center;gap:0;padding:10px 14px 8px;background:#FBFDFE}
+.pstep{flex:1;text-align:center;position:relative}
+.pstep .dot{width:7px;height:7px;border-radius:50%;background:#D9E3EC;margin:0 auto 4px;position:relative;z-index:2}
+.pstep .lbl{font-size:8.5px;color:#A7B4C0;letter-spacing:.02em;white-space:nowrap}
+.pstep::before{content:"";position:absolute;top:3px;left:-50%;width:100%;height:1.5px;background:#E4EBF1}
+.pstep:first-child::before{display:none}
+.pstep.done .dot{background:var(--teal);opacity:.45}
+.pstep.done::before{background:#C3D7EA}
+.pstep.on .dot{background:var(--teal);box-shadow:0 0 0 3px rgba(61,116,174,.16)}
+.pstep.on .lbl{color:var(--teal);font-weight:700}
+.pstep.on::before{background:#C3D7EA}
+.qcount{text-align:right;padding:2px 18px 0;font-family:'IBM Plex Mono',monospace;font-size:10px;color:#A7B4C0}
+
+/* chat body */
+.chat{flex:1;padding:12px 14px 16px;background:linear-gradient(180deg,#FDFEFF 0%,#F2F8FC 100%);overflow:hidden;display:flex;flex-direction:column;gap:10px;position:relative}
+.bmsg{display:flex;gap:8px;align-items:flex-start}
+.bmsg .av{width:26px;height:26px;border-radius:50%;background:var(--bl);flex-shrink:0;margin-top:2px;overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
+.bmsg .bb{background:var(--bl);color:#fff;border-radius:14px;padding:10px 13px;font-size:12.5px;line-height:1.7;max-width:225px;position:relative;font-family:'Zen Maru Gothic',sans-serif;font-weight:700}
+.bmsg .bb::before{content:"";position:absolute;left:-6px;top:10px;border:7px solid transparent;border-right:8px solid var(--bl);border-left:0}
+.bmsg .bb b{font-weight:900}
+.bmsg .bb .qno{font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;display:inline-block;margin-bottom:3px;letter-spacing:.06em;background:rgba(255,255,255,.22);border-radius:5px;padding:1px 7px}
+.umsg{align-self:flex-end;background:#fff;color:var(--teal-ink);border:1.5px solid var(--bl);border-radius:14px;padding:8px 14px;font-size:12px;max-width:210px;position:relative;font-family:'Zen Maru Gothic',sans-serif;font-weight:700}
+.umsg::after{content:"";position:absolute;right:-7px;top:10px;border:7px solid transparent;border-left:8px solid var(--bl);border-right:0}
+.choices{display:flex;flex-direction:column;gap:7px;padding-left:34px}
+.choice{background:#fff;border:1.5px solid #A9C6E4;color:var(--teal-ink);border-radius:999px;padding:10px 12px;font-size:12px;font-weight:700;text-align:center;line-height:1.5;font-family:'Zen Maru Gothic',sans-serif}
+.choice.sel{background:var(--teal);border-color:var(--teal);color:#fff}
+.reassure{display:flex;align-items:center;gap:6px;justify-content:center;font-size:10px;color:#93A3B1;margin-top:auto;padding-top:8px}
+.reassure .lk{font-size:10px}
+
+/* FV (LP-style hero) */
+.fv{flex:1;display:flex;flex-direction:column;padding:20px 20px 18px;background:linear-gradient(175deg,#FFFFFF 0%,#F0F7FC 55%,#DFEEF9 100%);position:relative;overflow:hidden;text-align:center}
+.fv .eyebrow{font-family:'Zen Maru Gothic',sans-serif;font-size:11px;font-weight:900;color:var(--teal);letter-spacing:.05em;margin-bottom:9px;padding:0 48px}
+.fv h3{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:20px;line-height:1.55;letter-spacing:.01em;margin-bottom:8px;color:var(--teal-ink)}
+.fv h3 em{font-style:normal;background:linear-gradient(transparent 68%,rgba(74,128,190,.32) 68%)}
+.fv .sub{font-family:'Zen Maru Gothic',sans-serif;font-weight:700;font-size:11.5px;line-height:1.8;color:#41586E;margin-bottom:10px}
+.fv .sub b{color:var(--teal-ink);font-weight:900}
+.fv .ill{width:118px;margin:0 auto 10px;display:block}
+.fv ul{list-style:none;display:flex;flex-direction:column;gap:5px;margin-bottom:auto;text-align:left;width:fit-content;margin-left:auto;margin-right:auto}
+.fv li{font-size:11px;color:#41586E;display:flex;gap:7px;align-items:flex-start;font-weight:500}
+.fv li::before{content:"✓";color:var(--teal);font-weight:900;flex-shrink:0}
+.deco{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:11px;color:var(--teal-ink);margin:10px 0 7px}
+.cta{display:block;width:100%;background:var(--teal);color:#fff;border-radius:12px;padding:14px 10px;text-align:center;font-size:14px;font-weight:900;letter-spacing:.03em;box-shadow:0 6px 14px -6px rgba(42,90,140,.55);font-family:'Zen Maru Gothic',sans-serif}
+.cta.ghost{background:#fff;color:var(--teal-deep);border:1.5px solid #A9C6E4;box-shadow:none;font-weight:700}
+.cta.line{background:var(--grn);box-shadow:0 6px 14px -6px rgba(82,189,81,.55)}
+.fv .reassure{margin-top:7px;padding-top:0}
+.fv .badge30{position:absolute;top:16px;right:14px;width:54px;height:54px;border-radius:50%;background:var(--teal-ink);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:14px;line-height:1;transform:rotate(6deg);z-index:2}
+.fv .badge30 small{font-size:7.5px;font-weight:700;margin-top:2px;letter-spacing:.04em}
+
+/* in-screen LP heading */
+.midashi{text-align:center;font-family:'Zen Maru Gothic',sans-serif;font-weight:900;color:var(--teal-ink);font-size:14.5px;padding-top:2px}
+.midashi::after{content:"";display:block;width:34px;height:3px;background:var(--teal);margin:5px auto 0;border-radius:2px}
+
+/* diagnosis result card (LP panel) */
+.rescard{background:var(--ice);border-radius:14px;overflow:hidden;margin-left:34px;padding:10px}
+.rescard .rh{font-family:'Zen Maru Gothic',sans-serif;background:#fff;color:var(--teal-ink);font-size:10px;font-weight:900;letter-spacing:.14em;padding:4px 12px;border-radius:6px;display:inline-block;margin-bottom:8px}
+.rescard .plname{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:15px;line-height:1.5;margin-bottom:7px;color:var(--teal-ink);border-left:4px solid var(--teal);padding-left:9px}
+.rescard .plname i{font-style:normal;font-size:10.5px;font-weight:700;color:var(--sub);display:block;margin-bottom:1px}
+.rescard .rsn{font-size:11px;color:#41586E;line-height:1.7}
+.rescard .rsn li{list-style:none;position:relative;padding-left:13px;margin-bottom:4px}
+.rescard .rsn li::before{content:"▪";position:absolute;left:0;color:var(--teal);font-size:9px;top:1px}
+.rescard .rsn li b{color:var(--teal-ink)}
+.pricebox{background:#fff;border-radius:10px;padding:9px 11px;margin-top:8px}
+.pricebox .pl1{font-size:10px;color:var(--sub);font-weight:700}
+.pricebox .pl2{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:17px;color:var(--teal-ink);line-height:1.3}
+.pricebox .pl2 small{font-size:10px;font-weight:700;color:var(--sub)}
+.pricebox .pl3{font-size:9px;color:#93A3B1;margin-top:2px}
+.rescard .cta{margin-top:10px;padding:11px;font-size:12.5px;border-radius:11px}
+
+/* plan cards (LP style) */
+.lpcard{background:var(--ice);border-radius:14px;padding:12px;position:relative}
+.lpcard .head{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.osusume{font-family:'Zen Maru Gothic',sans-serif;background:#fff;color:var(--org);font-size:10px;font-weight:900;border-radius:6px;padding:3px 9px;letter-spacing:.06em}
+.ptag{font-family:'Zen Maru Gothic',sans-serif;background:#fff;color:var(--teal-ink);font-size:11px;font-weight:900;border-radius:6px;padding:3px 10px}
+.pcatch{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:12px;color:var(--teal-ink);border-left:4px solid var(--teal);padding-left:8px;line-height:1.5;margin-bottom:8px}
+.prow{display:flex;gap:9px;align-items:flex-start;margin-bottom:8px}
+.prow .ill{width:82px;flex-shrink:0;border-radius:8px}
+.pspec{list-style:none;flex:1}
+.pspec li{font-size:10px;color:#41586E;line-height:1.55;position:relative;padding-left:11px;margin-bottom:4px}
+.pspec li::before{content:"▪";position:absolute;left:0;color:var(--teal);font-size:8px;top:1px}
+.pspec li b{color:var(--teal-ink);font-weight:700}
+.lpcard .offer{font-family:'Zen Maru Gothic',sans-serif;font-size:10.5px;font-weight:900;color:var(--amber);background:var(--amber-soft);border-radius:8px;padding:6px 10px;margin-bottom:8px;text-align:center}
+.lpcard .cta{padding:11px;font-size:12.5px;border-radius:10px}
+.lpcard.rc{box-shadow:0 0 0 2px var(--teal) inset}
+
+/* form */
+.formcard{background:#fff;border:1px solid #E0EAF2;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.fitem .flbl{font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;margin-bottom:4px;color:var(--teal-ink)}
+.fitem .req{font-size:8.5px;color:#fff;background:var(--mark);border-radius:4px;padding:1px 5px;font-weight:600}
+.fitem .why{font-size:9.5px;color:#7E8FA0;margin-top:4px;position:relative;padding-left:15px}
+.fitem .why::before{content:"ⓘ";color:var(--teal);position:absolute;left:0}
+.fitem .why b{color:var(--teal-deep)}
+.finput{background:#F6FAFD;border:1.5px solid #DCE7F0;border-radius:9px;padding:9px 11px;font-size:12px;color:#7E8FA0;display:flex;align-items:center;justify-content:space-between}
+.finput.filled{color:var(--ink);background:#fff;border-color:#A9C6E4}
+.finput .ok{color:#1C9E6E;font-weight:700;font-size:11px}
+.frow2{display:flex;gap:8px}
+.frow2 .finput{flex:1}
+.frow3{display:flex;gap:6px}
+.frow3 .finput{flex:1;justify-content:center;gap:4px}
+.finput .car{color:#A7B4C0;font-size:9px}
+.zipbtn{background:var(--teal);color:#fff;border-radius:9px;font-size:10.5px;font-weight:700;padding:9px 12px;display:flex;align-items:center;white-space:nowrap}
+.fitem.mail{border:1.5px solid var(--teal);border-radius:12px;padding:11px 12px;background:#F2F8FD;position:relative}
+.fitem.mail .lifeline{position:absolute;top:-8px;right:10px;background:var(--teal);color:#fff;font-size:8.5px;font-weight:700;padding:1px 8px;border-radius:999px;letter-spacing:.06em}
+.checks{display:flex;flex-direction:column;gap:9px}
+.chk{display:flex;gap:9px;align-items:flex-start;font-size:11px;line-height:1.55}
+.chk .box{width:17px;height:17px;border-radius:5px;background:var(--teal);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.chk a{color:var(--teal);text-decoration:underline;text-underline-offset:2px}
+
+/* confirm */
+.cfitem{display:flex;justify-content:space-between;gap:10px;padding:9px 2px;border-bottom:1px dashed #E4EBF1;font-size:11.5px}
+.cfitem:last-child{border-bottom:none}
+.cfitem .k{color:var(--sub);flex-shrink:0}
+.cfitem .v{text-align:right;font-weight:500}
+.cfitem .v b{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:14.5px;color:var(--teal-ink)}
+.cfitem .v small{display:block;font-size:9px;color:#93A3B1;font-weight:400}
+.tokusho{font-size:9px;color:var(--mark);font-weight:600;text-align:right;margin-top:6px;letter-spacing:.04em}
+
+/* done */
+.donewrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 22px;background:linear-gradient(180deg,#FDFEFF,#EDF5FB)}
+.donewrap .big{width:62px;height:62px;border-radius:50%;background:var(--teal);color:#fff;font-size:28px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 10px 24px -10px rgba(42,90,140,.6)}
+.donewrap h3{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:18px;margin-bottom:10px;color:var(--teal-ink)}
+.donewrap p{font-size:12px;color:#41586E;line-height:1.8;margin-bottom:14px}
+.nextcard{width:100%;background:#fff;border:1.5px solid var(--teal);border-radius:12px;padding:11px 12px;margin-bottom:14px}
+.nextcard .nk{font-size:9.5px;font-weight:700;color:var(--teal);letter-spacing:.1em;margin-bottom:3px}
+.nextcard .nv{font-size:12.5px;font-weight:700}
+/* relay done screen */
+.donewrap.relay{justify-content:flex-start;padding-top:14px}
+.donewrap.relay .big{width:44px;height:44px;font-size:19px;margin-bottom:8px}
+.donewrap.relay h3{font-size:16px;margin-bottom:6px}
+.donewrap.relay p{margin-bottom:11px;font-size:11.5px}
+.stcard{width:100%;background:#fff;border:1.5px solid #DCE7F0;border-radius:13px;padding:12px 13px;text-align:left;margin-bottom:9px}
+.stcard.hot{border-color:var(--grn);box-shadow:0 6px 16px -8px rgba(82,189,81,.5)}
+.sthead{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.stno{font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.1em;color:#fff;background:var(--teal);border-radius:4px;padding:2px 8px}
+.stcard.hot .stno{background:var(--grn)}
+.sttime{font-size:9px;color:#A7B4C0;font-family:'IBM Plex Mono',monospace}
+.sttl{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:13px;margin-bottom:6px;line-height:1.5;color:var(--teal-ink)}
+.stben{list-style:none;display:flex;flex-direction:column;gap:4px;margin-bottom:9px}
+.stben li{font-size:10.5px;color:#41586E;line-height:1.55;position:relative;padding-left:14px}
+.stben li::before{content:"✓";color:var(--grn);font-weight:700;position:absolute;left:0}
+.stben li b{color:var(--ink)}
+.stdesc{font-size:10.5px;color:#41586E;line-height:1.65;margin-bottom:6px}
+.stdesc b{color:var(--ink)}
+.stlink{font-size:9.5px;color:var(--teal);text-decoration:underline;text-underline-offset:2px}
+.stmicro{font-size:9px;color:#93A3B1;text-align:center;margin-top:7px}
+.skiplink{font-size:9px;color:#A7B4C0;text-decoration:underline;text-underline-offset:2px;margin-top:3px}
+/* LINE talk mock */
+.lbar{background:var(--grn);color:#fff;display:flex;align-items:center;gap:8px;padding:12px 14px;font-size:12px;font-weight:700}
+.lbar .back{font-size:14px;opacity:.9}
+.lbar .oa{width:20px;height:20px;border-radius:50%;background:#fff;flex-shrink:0;overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
+.lbar .vbadge{margin-left:auto;font-size:8px;background:rgba(255,255,255,.28);padding:2px 8px;border-radius:999px;font-weight:600;letter-spacing:.04em}
+.lchat{flex:1;background:#8AA0BE;padding:14px 12px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.lmsg{display:flex;gap:7px;align-items:flex-start}
+.lmsg .lav{width:26px;height:26px;border-radius:50%;background:#fff;flex-shrink:0;overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
+.lmsg .lbb{background:#fff;border-radius:3px 14px 14px 14px;padding:10px 12px;font-size:11px;line-height:1.65;max-width:232px}
+.lmsg .lbb b{font-weight:700}
+.lcard{background:#fff;border-radius:14px;margin-left:33px;max-width:232px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.lcard .lct{padding:11px 12px 10px;font-size:11px;line-height:1.65}
+.lcard .lct .lk{font-size:9px;font-weight:700;color:var(--grn);letter-spacing:.08em;display:block;margin-bottom:3px;font-family:'IBM Plex Mono',monospace}
+.lcard .lct b{font-weight:700}
+.lcard .lbtn{display:block;text-align:center;border-top:1px solid #EDEDED;color:var(--grn);font-weight:700;font-size:12px;padding:10px}
+.ltime{font-size:8.5px;color:rgba(255,255,255,.9);margin-left:33px}
+
+/* region / plan-carry / optional (STEP 7c) */
+.regionchip{display:flex;align-items:center;gap:7px;background:#EAF7EE;border:1px solid #BFE3CB;border-radius:9px;padding:8px 10px;font-size:10.5px;color:#1F7A4D;font-weight:700}
+.regionchip small{font-weight:500;color:#4E8566;margin-left:auto;text-decoration:underline;font-size:9px}
+.chk .box.off{background:#fff;border:1.5px solid #B9C6D1;color:transparent}
+.chk.mini{font-size:10px;color:#5E6E7C;align-items:center}
+.chk.mini .box{width:15px;height:15px;font-size:9px;border-radius:4px;margin-top:0}
+.optlink{font-size:10.5px;color:var(--teal);text-decoration:underline;text-underline-offset:2px;font-weight:600}
+.planchip{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--teal);border-radius:10px;padding:9px 11px}
+.planchip .pk{font-size:9px;font-weight:700;color:var(--teal);letter-spacing:.08em;flex-shrink:0}
+.planchip .pv{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:12px;color:var(--teal-ink)}
+.planchip .chg{margin-left:auto;font-size:9.5px;color:#93A3B1;text-decoration:underline;flex-shrink:0}
+
+/* v8: carousel / e-sign / payment */
+.caro{display:flex;gap:10px;overflow:hidden;margin:0 -6px;padding:2px 6px}
+.caro .lpcard{flex:0 0 84%;min-width:84%}
+.dots{display:flex;gap:5px;justify-content:center;margin-top:2px}
+.dots span{width:6px;height:6px;border-radius:50%;background:#C9D8E6}
+.dots span.on{background:var(--teal);width:16px;border-radius:3px}
+.comparelink{text-align:center;font-size:10.5px;color:var(--teal);text-decoration:underline;text-underline-offset:2px;font-weight:600}
+.signbox{background:#F4F9FD;border:1.5px solid var(--teal);border-radius:12px;padding:11px 12px;position:relative}
+.signbox .sglbl{position:absolute;top:-8px;left:10px;background:var(--teal);color:#fff;font-size:8.5px;font-weight:700;padding:1px 8px;border-radius:999px;letter-spacing:.06em}
+.signbox .sgrow{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--teal-ink)}
+.signbox .sgrow .ok{color:#1C9E6E;font-weight:700;font-size:11px;margin-left:auto}
+.signbox .sgnote{font-size:9px;color:#7E8FA0;margin-top:5px}
+.paybtn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:#111;color:#fff;border-radius:12px;padding:13px 10px;font-size:14px;font-weight:700;letter-spacing:.02em;font-family:'Zen Maru Gothic',sans-serif}
+.ordiv{display:flex;align-items:center;gap:10px;font-size:9.5px;color:#93A3B1;margin:2px 0}
+.ordiv::before,.ordiv::after{content:"";flex:1;height:1px;background:#E0EAF2}
+.paysum{display:flex;justify-content:space-between;align-items:baseline;background:var(--ice);border-radius:10px;padding:9px 12px;font-size:11px;color:var(--teal-ink)}
+.paysum b{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:16px}
+
+/* v10: big CTA / voice / plain note */
+.cta.big{font-size:16.5px;padding:16px 34px 16px 12px;border-radius:14px;background:linear-gradient(180deg,#5490CE,#2F5F94);box-shadow:0 10px 24px -8px rgba(42,90,140,.7);position:relative;animation:ctapulse 2.2s ease-in-out infinite}
+.cta.big::after{content:"›";position:absolute;right:16px;top:50%;transform:translateY(-54%);font-size:22px;font-weight:900;opacity:.95}
+@keyframes ctapulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+.formnote{font-family:'Zen Maru Gothic',sans-serif;font-weight:700;font-size:11px;color:#41586E;line-height:1.75;text-align:center}
+.vfeat{background:var(--ice);border-radius:14px;padding:11px;display:flex;gap:10px;align-items:flex-start}
+.vph{width:54px;height:54px;border-radius:12px;flex-shrink:0;overflow:hidden;background:#CFE3F2;display:flex;align-items:flex-end;justify-content:center}
+.vph .favt{width:92%;height:92%}
+.vbadge{display:inline-block;background:#fff;color:var(--teal);font-size:8.5px;font-weight:900;border-radius:5px;padding:2px 7px;margin-bottom:4px;font-family:'Zen Maru Gothic',sans-serif}
+.vq{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:12px;color:var(--teal-ink);line-height:1.65}
+.vwho{font-size:9px;color:#47555F;margin-top:4px}
+.vrow{display:flex;gap:8px;overflow:hidden;margin-right:-14px}
+.vcard{flex:0 0 150px;background:#fff;border:1px solid #DCE7F0;border-radius:12px;padding:9px 10px}
+.vcard .vq{font-size:10px;font-weight:700;color:#33475C}
+.vmore{text-align:center;font-size:10px;color:var(--teal);text-decoration:underline;text-underline-offset:2px;font-weight:600}
+
+/* captions */
+.cap{margin-top:16px}
+.cap .cstep{font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;color:var(--mark);letter-spacing:.1em;display:block}
+.cap h5{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;font-size:14px;margin:3px 0 8px}
+.cap ul{list-style:none;display:flex;flex-direction:column;gap:5px}
+.cap li{font-size:12px;color:#3D4B56;line-height:1.65;display:flex;gap:7px}
+.cap li .n{flex-shrink:0;width:15px;height:15px;border-radius:50%;background:var(--mark);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.cap li b{color:var(--ink)}
+.cap li.data .n{background:var(--teal)}
+
+/* note blocks / tables */
+.noteblock{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-top:8px}
+.noteblock h4{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;font-size:14.5px;margin-bottom:10px;display:flex;gap:8px;align-items:center}
+.noteblock h4::before{content:"";width:8px;height:8px;background:var(--mark);border-radius:2px;flex-shrink:0}
+.noteblock ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+.noteblock li{font-size:13px;color:#333F4A;padding-left:14px;position:relative;line-height:1.8}
+.noteblock li::before{content:"—";position:absolute;left:0;color:#B9C6D1}
+.noteblock li b{color:var(--ink)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+
+table.ab{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:20px;font-size:12.5px}
+table.ab th{background:var(--teal-ink);color:#DCE8F2;font-weight:600;text-align:left;padding:10px 14px;font-size:11.5px;letter-spacing:.04em}
+table.ab td{padding:11px 14px;border-top:1px solid #E8EEF3;vertical-align:top;color:#333F4A;line-height:1.7}
+table.ab td:first-child{font-family:'IBM Plex Mono',monospace;color:var(--mark);font-weight:600}
+table.ab td b{color:var(--ink)}
+table.ab .hon{background:var(--mark-soft);color:var(--mark);font-size:9.5px;font-weight:700;border-radius:4px;padding:1px 6px;margin-left:5px;white-space:nowrap}
+.tblwrap{overflow-x:auto}
+
+.todo{display:grid;grid-template-columns:1fr 1fr;gap:8px 22px;margin-top:18px}
+@media(max-width:900px){.todo{grid-template-columns:1fr}}
+.todo div{display:flex;gap:9px;font-size:12.5px;color:#333F4A;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:9px;padding:10px 13px}
+.todo div::before{content:"";width:14px;height:14px;border:1.5px solid #B9C6D1;border-radius:4px;flex-shrink:0;margin-top:3px}
+
+.repeat4{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.repeat4 span{font-size:11.5px;background:var(--ice);color:var(--teal-deep);border-radius:999px;padding:5px 14px;font-weight:600}
+.repeat4 span i{font-style:normal;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--teal);margin-right:5px}
+
+.doc-foot{margin-top:56px;background:var(--teal-ink);color:#9CBCD9;padding:30px 0 36px;font-size:11.5px}
+.doc-foot .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.doc-foot b{color:#EAF1F7;font-weight:500}
+</style>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header class="doc-head">
+  <div class="wrap">
+    <div class="kicker"><span>HDXセルバンク（精子凍結みらいバンク®）</span><span>/</span><span>動線まとめ 4-3詳細</span><span>/</span><b>LP MOCKUP v10</b></div>
+    <h1>bot一体型LP　UIパターン案<small>最悪未来型FV × 利用者の声 × プランカルーセル × 2ステップ入力 × LP内契約（電子署名）・決済（Apple Pay優先） × LINE完結</small></h1>
+    <p class="lead"><b>CVR定義（確定）</b>：記事LPのCTAクリック数を母数、bot一体型LP内のフォーム入力完了数を分子。<b>動線（v10方針）</b>：CR → 記事LP → CTAクリック → <b>縦長LP（FV → 利用者の声 → プラン）→ 入力2ステップ → 電子署名 → 決済までワンページ動線で完結</b>。チャット型UI（吹き出し・1問1答）は廃止し通常LP型へ → 完了後はLINEが手続きの続き（発送通知・検査結果・相談）。メール決済ホップを廃し、診断パートは置かず、プラン提示型を本命仮説として一本で走る。※契約・決済のbot内完結は実装可否と成果定義の再整理が前提（§9）。デザインは現行LP準拠・価格は税込実勢。</p>
+    <div class="meta-row">
+      <div>PROJECT<b>HDXセルバンク｜精子凍結みらいバンク® bot一体型LP</b></div>
+      <div>SOURCE<b>Notion 4-3詳細 ＋ 現行LP（miraifamily.jp）</b></div>
+      <div>DATE<b>2026-08-13（v10）</b></div>
+      <div>NOTE<b>価格は現行LPの税込表記を反映／オファー適用後価格・U-25価格は未確定</b></div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= SEC 00 : ルート＋離脱マップ ================= -->
+<section class="leak">
+  <div class="wrap">
+    <div class="sec-head" style="border-top:none;padding-top:0">
+      <span class="no">SEC 00</span><h2>フロー全体像と3つの離脱区間</h2><span class="tag">本命一本：最悪未来FV → 声 → プラン → LP内決済（診断は置かない・チャットUI廃止）</span>
+    </div>
+
+    <div class="routebox">
+      <div class="rt">
+        <span class="rtag a">本命フロー（一本）</span>
+        <div class="flowchips">
+          <span class="fchip hl"><b>FV</b> 最悪未来訴求</span><span class="farrow">→</span>
+          <span class="fchip hl"><b>声</b> 実名利用者</span><span class="farrow">→</span>
+          <span class="fchip hl"><b>プラン</b> 横スライド（標準先頭）</span><span class="farrow">→</span>
+          <span class="fchip hl"><b>入力</b> 2ステップ・6項目</span><span class="farrow">→</span>
+          <span class="fchip hl"><b>契約</b> 署名転記＋チェックのみ</span><span class="farrow">→</span>
+          <span class="fchip hl"><b>決済</b> LP内・Apple Pay優先</span><span class="farrow">→</span>
+          <span class="fchip hl"><b>完了</b> LINEへ</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="noteblock" style="margin-top:0">
+      <h4>なぜ診断を置かないか（本命仮説）</h4>
+      <ul>
+        <li><b>理由</b>：読者は記事で訴求を受けてから来ている＝ここで改めて診断を挟む必然性が薄く、ステップの追加は離脱側に働く。現行15%の主因はプラン押しの内容ではなく「相談ホップ＋一括フォーム」という動線構造 → 診断ではなく<b>動線の圧縮</b>で解く</li>
+        <li><b>診断が担っていた機能の代替</b>：U-25の出し分け → プラン画面の「25歳以下の方はこちら」＋生年月日での再判定／訴求の出し分け → 記事面ごとのFV文言差し替えで担う</li>
+        <li><b>切り替え条件</b>：ABで診断型と並走比較はしない。本命一本で基準値を取得し、FV通過が想定を大きく下回った場合にのみ「年齢1問版・診断型」を検討対象に戻す（本資料からは省略）</li>
+        <li><b>FVと遷移の整合</b>：FVは診断を約束しない＝プラン直行と矛盾しない</li>
+      </ul>
+    </div>
+
+    <div class="leakgrid">
+      <div class="leakcard">
+        <span class="zn">区間① CTAクリック → LP表示・最初のタップ</span>
+        <h4>「契約させられそう」「高そう」の警戒</h4>
+        <div class="fact">DENBA実測：起動〜最初の入力で <b>75〜78%離脱</b>（最大ボトルネック）</div>
+        <div class="fix">対策 → <b>最悪未来型FV</b>：老化（事実）の先にある本人の最悪の未来まで言い切り、タップ1回でプランへ直行。記事の訴求品質に依存しない</div>
+      </div>
+      <div class="leakcard">
+        <span class="zn">区間② プラン提示 → 選択</span>
+        <h4>プラン比較の複雑さ・価格初出しショック</h4>
+        <div class="fact">DENBA実測：<b>19万円の価格初出し</b>がネガティブに働いた可能性（≒現行LPの5年総額193,750円が相当）</div>
+        <div class="fix">対策 → <b>プラン提示UI＋オファー</b>：価格は月額換算で初出し／料金表ではなく「選ぶ理由別カードUI」</div>
+      </div>
+      <div class="leakcard">
+        <span class="zn">区間③ プラン選択 → 入力完了</span>
+        <h4>個人情報入力の負荷・不安</h4>
+        <div class="fact">BOTCHAN実測：<b>名前入力で約半数離脱</b>／選択式はほぼ落ちない（性別91.9%・誕生日95.1%回答）</div>
+        <div class="fix">対策 → <b>入力2ステップ＋署名転記＋Pay1タップ</b>：電話・メール・クーポン・備考を撤去し、契約〜決済までLP内で完結（後段ホップを消す）</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SEC 01 : FV ================= -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="no">SEC 01 / STEP 0</span><h2>ファーストビュー — 最悪未来型（本命一本）</h2><span class="tag">事実（老化・不可逆）で止めず、本人の最悪の未来まで言い切る</span>
+    </div>
+    <p class="sec-lead">現行LP→LINE追加は約15%（参考：危機感訴求が強い医療系LPではLINE CTAで50%級の事例もあるが、顕在ペイン商材のため単純比較は不可）。記事LPの訴求品質という上流変数に依存せず、<b>FV自身が「今やらないと失うもの」を再点火する</b>のが本命方針。v10では精子の老化（事実）の提示で止めず、<b>その帰結＝ユーザー本人の最悪の未来（欲しいと思った日に、間に合わない）</b>までを想起させる文言に強化。ABで比較する前提は取らず、この最悪未来型を本命仮説として一本で走り、基準値を見て表現強度を調整する。最初のアクションはタップ1回・価格非表示。</p>
+
+    <div class="row">
+
+
+      <!-- FV E -->
+      <div class="unit">
+        <span class="corner mark">本命：最悪未来型（プラン直行）</span>
+        <div class="device"><div class="scr">
+          <div class="statusbar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+          <div class="appbar"><span class="avmark"><svg class="favt" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 49c0-10.5 7.2-14.5 16-14.5s16 4 16 14.5z" fill="#fff"/><rect x="20" y="25.5" width="8" height="8.5" rx="3" fill="#F0B98C"/><circle cx="24" cy="19" r="10.5" fill="#F8CDA3"/><path d="M13.6 19.5C12 11 17.8 6.5 24 6.5s12 4.5 10.4 13c-1.8-4.8-5.4-6.3-10.4-6.3s-8.6 1.5-10.4 6.3z" fill="#33475C"/><circle cx="20.2" cy="19.8" r="1.15" fill="#33475C"/><circle cx="27.8" cy="19.8" r="1.15" fill="#33475C"/><path d="M21.3 24.2c1.6 1.3 3.8 1.3 5.4 0" stroke="#33475C" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></span><span class="t">精子凍結みらいバンク<i class="rmark">®</i></span><span class="x">✕</span></div>
+          <div class="fv">
+            <div class="eyebrow">精子も、卵子と同じように老化します</div>
+            <h3>欲しいと思ったその日に、<br><em>つくれないかもしれない。</em></h3>
+            <p class="sub">老化した精子は、<b>元に戻せません</b>。<br>数年後の「そろそろ」に間に合わせられるのは、<br>いちばん若い<b>“今”を凍結して残しておく</b>ことだけ。</p>
+            <svg class="ill" viewBox="0 0 120 92" aria-hidden="true"><rect width="120" height="92" rx="10" fill="#CFE3F2"/><path d="M0 38C26 26 52 48 82 34c15-7 30-4 38 1v57H0z" fill="#AACBE8"/><path d="M0 58c30-13 58 7 90-5 12-4 22-3 30 2v37H0z" fill="#7FAAD6"/><g stroke="#fff" stroke-width="3" opacity=".5" stroke-linecap="round"><path d="M92 8l16 16"/><path d="M100 4l16 16"/><path d="M108 0l16 16"/></g><path d="M34 92c0-14.5 11-20.5 26-20.5S86 77.5 86 92z" fill="#fff"/><path d="M60 73.5l-2.4 3 1.2 12 1.2 2.2 1.2-2.2 1.2-12z" fill="#3D74AE"/><path d="M53 71.5l7 5 7-5" fill="none" stroke="#D8E4EE" stroke-width="2"/><rect x="54.5" y="57" width="11" height="10.5" rx="4" fill="#F0B98C"/><circle cx="60" cy="47" r="13" fill="#F8CDA3"/><path d="M47.4 47.7C45.4 37 52.6 31.4 60 31.4s14.6 5.6 12.6 16.3C70.4 41.6 66 39.7 60 39.7s-10.4 1.9-12.6 8z" fill="#33475C"/><circle cx="55.4" cy="48.4" r="1.35" fill="#33475C"/><circle cx="64.6" cy="48.4" r="1.35" fill="#33475C"/><path d="M56.6 53.6c2 1.5 4.8 1.5 6.8 0" stroke="#33475C" stroke-width="1.5" fill="none" stroke-linecap="round"/><g><circle cx="27" cy="24" r="11" fill="#fff"/><text x="27" y="29.5" text-anchor="middle" font-size="15" font-weight="700" fill="#4A80BE" font-family="Arial,sans-serif">?</text></g></svg>
+            <ul>
+              <li>診断・質問はありません。そのままプランを確認</li>
+              <li>お支払いは、最後に内容を確認してから</li>
+            </ul>
+            <div class="deco">＼ 後悔する前に、「今」を残す ／</div>
+            <a class="cta big">プランを見る</a>
+            <div class="reassure"><span class="lk">🔒</span>個人情報の入力はプラン選択後です</div>
+          </div>
+        </div></div>
+        <div class="cap">
+          <span class="cstep">FV ─ 最悪未来型（本命・プラン直行）</span>
+          <h5>事実で止めず、「本人の最悪の未来」まで言い切る</h5>
+          <ul>
+            <li><span class="n">1</span>「老化する・戻せない」（精子の話）だけでは自分ごと化しない。<b>帰結＝欲しいと思った日に、間に合わないかもしれない</b>——本人の未来まで描いて初めて「今やる理由」になる</li>
+            <li><span class="n">2</span>断定は避け「〜かもしれない」の蓋然性表現で構成＝媒体考査・薬機法リスクを抑えつつ危機感は維持。事実アンカー（老化・不可逆）はクライアント公式YouTube既出の範囲。最終文言・数値出典は§9</li>
+            <li><span class="n">3</span>LP→LINE追加15%の主因仮説（危機感の減衰＋「ご相談」CTA）に対し、<b>危機感の再点火とタップ1回の行動</b>を同一画面で完結させる</li>
+            <li><span class="n">4</span><b>CTAは動詞一言「プランを見る」</b>（改行なし・1秒で読める）。押す理由はH1とマイクロコピーで先に作り、ボタン自体は矢印・グラデーション・パルスで「進める」ことだけを伝える</li>
+            <li class="data"><span class="n">◎</span>ABは走らせず本命一本で基準値取得。表現の強・中・弱3案は差し替え用に準備（バックログ#1）</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ================= SEC 02 : 利用者の声 ================= -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="no">SEC 02 / SOCIAL PROOF</span><h2>利用者の声 — 危機感とプランの中継点</h2><span class="tag">読了必須にしない：横スクロール・2行要約・直下にCTA再掲</span>
+    </div>
+    <p class="sec-lead">LP化に伴い新設。FV（最悪未来）で立ち上がった緊張を、<b>実在の利用者の証言で「自分ごとの裏づけ」に変換してからプランへ渡す</b>。掲載4本はいずれもFVの主張を第三者が代弁する内容（35歳の壁×2・検査価値・若いうちがベスト）で、公式サイト「お客様の声」からの要約引用。<b>読み飛ばしても動線が成立する</b>ことを設計原則にし、CVRの障害ではなく後押しとして機能させる。</p>
+
+    <div class="row">
+
+      <div class="unit">
+        <span class="corner teal">FVとプランの間に挿入</span>
+        <div class="device"><div class="scr">
+          <div class="statusbar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+          <div class="appbar"><span class="avmark"><svg class="favt" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 49c0-10.5 7.2-14.5 16-14.5s16 4 16 14.5z" fill="#fff"/><rect x="20" y="25.5" width="8" height="8.5" rx="3" fill="#F0B98C"/><circle cx="24" cy="19" r="10.5" fill="#F8CDA3"/><path d="M13.6 19.5C12 11 17.8 6.5 24 6.5s12 4.5 10.4 13c-1.8-4.8-5.4-6.3-10.4-6.3s-8.6 1.5-10.4 6.3z" fill="#33475C"/><circle cx="20.2" cy="19.8" r="1.15" fill="#33475C"/><circle cx="27.8" cy="19.8" r="1.15" fill="#33475C"/><path d="M21.3 24.2c1.6 1.3 3.8 1.3 5.4 0" stroke="#33475C" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></span><span class="t">精子凍結みらいバンク<i class="rmark">®</i></span><span class="x">✕</span></div>
+          <div class="chat" style="gap:11px">
+            <div class="midashi">利用者の声</div>
+            <div class="vfeat">
+              <span class="vph"><svg class="favt" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 49c0-10.5 7.2-14.5 16-14.5s16 4 16 14.5z" fill="#fff"/><rect x="20" y="25.5" width="8" height="8.5" rx="3" fill="#F0B98C"/><circle cx="24" cy="19" r="10.5" fill="#F8CDA3"/><path d="M13.6 19.5C12 11 17.8 6.5 24 6.5s12 4.5 10.4 13c-1.8-4.8-5.4-6.3-10.4-6.3s-8.6 1.5-10.4 6.3z" fill="#33475C"/><circle cx="20.2" cy="19.8" r="1.15" fill="#33475C"/><circle cx="27.8" cy="19.8" r="1.15" fill="#33475C"/><path d="M21.3 24.2c1.6 1.3 3.8 1.3 5.4 0" stroke="#33475C" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></span>
+              <div>
+                <span class="vbadge">パリ2024 レスリング サモア代表</span>
+                <div class="vq">「男性にも“35歳の壁”がある。数値が正常な今のうちに、将来へ備えることが大切だと実感しました」</div>
+                <div class="vwho">赤澤 岳 様（34歳・妊活予定者）※実サイトでは実名・実写真で掲載</div>
+              </div>
+            </div>
+            <div class="vrow">
+              <div class="vcard"><span class="vbadge">35歳・会社役員</span><div class="vq">35歳から機能が下がると聞き、今のうちに凍結保管。申込〜預け入れは意外なほど簡単でした</div></div>
+              <div class="vcard"><span class="vbadge">45歳・弁護士</span><div class="vq">受診なしで検査〜保管までワンストップ。状態を確認できた精子を保管している安心感</div></div>
+              <div class="vcard"><span class="vbadge">23歳・会社員</span><div class="vq">人生でいちばん若い“今”がベスト。タイムカプセルみたいで楽しみです</div></div>
+            </div>
+            <div class="dots"><i class="on"></i><i></i><i></i></div>
+            <div class="vmore">ほかの声を見る（お客様の声）</div>
+            <a class="cta">プランを見る</a>
+          </div>
+        </div></div>
+        <div class="cap">
+          <span class="cstep">LPブロック ─ 利用者の声（FV直後・プラン直前）</span>
+          <h5>「危機感 → 自分ごとの裏づけ → 選択」の橋を架ける</h5>
+          <ul>
+            <li><span class="n">1</span><b>実名・オリンピアンをトップ固定</b>：実在性と権威性が最も高い1本。しかも内容がFVの主張（35歳の壁・今のうちに備える）の当事者証言になっている</li>
+            <li><span class="n">2</span><b>年齢帯3種の横スクロール</b>（35歳／45歳／23歳）＝読者が「自分に近い声」を1枚だけ見れば足りる設計。全読させない</li>
+            <li><span class="n">3</span><b>CVR阻害の回避</b>：各カード2行以内・横スクロールで縦の場所を取らない・直下にCTA再掲（声→即行動）。星・件数など根拠のない定量表現は使わない</li>
+            <li class="data"><span class="n">◎</span>掲載許諾・引用要約の承認・「個人の感想」注記は§9（実名・肖像・競技実績の表記を含む）</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="unit" style="width:420px;flex-basis:420px">
+        <div class="noteblock">
+          <h4>口コミ素材 → LP抜粋の設計（出典：公式「お客様の声」）</h4>
+          <ul>
+            <li><b>赤澤 岳 様（実名・34歳・妊活予定者）</b>：不妊検査で自身に原因があると判明した経験から「男性にも35歳の壁」「数値が正常でも将来に備える」。<b>FVの主張そのものを当事者が語る最強の1本</b> → トップ固定</li>
+            <li><b>安井様（仮名・35歳・会社役員）</b>：「35歳から機能が低下すると聞き今のうちに」「申込〜預け入れは意外に簡単」＝<b>手続き不安の解消</b>を兼ねる</li>
+            <li><b>高野様（仮名・45歳・弁護士）</b>：「受診なしで検査〜保管までワンストップ」「状態を確認できた精子を保管している安心感」＝<b>検査価値と利便性</b>の証言</li>
+            <li><b>石橋様（仮名・23歳・会社員）</b>：「いちばん若い今がベスト」「タイムカプセルみたい」＝<b>U-25とポジティブ感情</b>で締める</li>
+            <li><b>編集原則</b>：全文は載せず2行以内に要約し、深掘りは「お客様の声」リンクで任意化。原文の「妊孕性が保証された」等は<b>効果保証と読める表現のため「状態を確認できた」に置換</b>（要約の最終承認は§9）</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ================= SEC 03 : プラン選択 ================= -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="no">SEC 03 / STEP 1</span><h2>プラン選択 — 直行 × 横スライドカルーセル</h2><span class="tag">FVから直接遷移／標準を1枚目固定＋オススメ</span>
+    </div>
+    <p class="sec-lead">縦積み3枚は約2画面分のスクロール＝比較疲れとCTA到達の遅延を生むため、<b>1枚フォーカスの横カルーセル</b>に変更。次カードは右端のチラ見せ（peek）とドットで示唆する。カルーセルは2枚目以降の視認率が下がる定石があるため、①標準を1枚目に固定（オススメ）②peek幅を広めに取る ③「料金を比較する」で縦一覧に切替できる逃げ道——の3点をセットで実装。おすすめ根拠は直行時「状態を確認してから保管したい方に選ばれています」（7-4承認コピー）、診断経由（AB対照）時は「診断結果より」に差し替え。</p>
+
+    <div class="row">
+
+      <div class="unit">
+        <div class="device"><div class="scr h700">
+          <div class="statusbar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+          <div class="appbar"><span class="avmark"><svg class="favt" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 49c0-10.5 7.2-14.5 16-14.5s16 4 16 14.5z" fill="#fff"/><rect x="20" y="25.5" width="8" height="8.5" rx="3" fill="#F0B98C"/><circle cx="24" cy="19" r="10.5" fill="#F8CDA3"/><path d="M13.6 19.5C12 11 17.8 6.5 24 6.5s12 4.5 10.4 13c-1.8-4.8-5.4-6.3-10.4-6.3s-8.6 1.5-10.4 6.3z" fill="#33475C"/><circle cx="20.2" cy="19.8" r="1.15" fill="#33475C"/><circle cx="27.8" cy="19.8" r="1.15" fill="#33475C"/><path d="M21.3 24.2c1.6 1.3 3.8 1.3 5.4 0" stroke="#33475C" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></span><span class="t">精子凍結みらいバンク<i class="rmark">®</i></span><span class="x">✕</span></div>
+          <div class="prog"><div class="pstep on"><div class="dot"></div><div class="lbl">プラン</div></div><div class="pstep "><div class="dot"></div><div class="lbl">申込情報</div></div><div class="pstep "><div class="dot"></div><div class="lbl">契約</div></div><div class="pstep "><div class="dot"></div><div class="lbl">決済</div></div><div class="pstep "><div class="dot"></div><div class="lbl">完了</div></div></div>
+          <div class="chat" style="gap:10px">
+            <div class="midashi">あなたへのおすすめプラン</div>
+            <p class="formnote">左右にスワイプして選べます。お支払いは、最後に内容を確認してから。</p>
+            <div class="caro">
+              <div class="lpcard rc">
+                <div class="head"><span class="osusume">オススメ！</span><span class="ptag">検査つき標準プラン</span></div>
+                <div class="pcatch">“預けられる状態か”を確認してから、お得に預けたい人に！</div>
+                <div class="prow">
+                  <svg class="ill" viewBox="0 0 120 92" aria-hidden="true"><rect width="120" height="92" rx="10" fill="#CFE3F2"/><path d="M0 38C26 26 52 48 82 34c15-7 30-4 38 1v57H0z" fill="#AACBE8"/><path d="M0 58c30-13 58 7 90-5 12-4 22-3 30 2v37H0z" fill="#7FAAD6"/><g stroke="#fff" stroke-width="3" opacity=".5" stroke-linecap="round"><path d="M92 8l16 16"/><path d="M100 4l16 16"/><path d="M108 0l16 16"/></g><path d="M34 92c0-14.5 11-20.5 26-20.5S86 77.5 86 92z" fill="#fff"/><path d="M60 73.5l-2.4 3 1.2 12 1.2 2.2 1.2-2.2 1.2-12z" fill="#3D74AE"/><path d="M53 71.5l7 5 7-5" fill="none" stroke="#D8E4EE" stroke-width="2"/><rect x="54.5" y="57" width="11" height="10.5" rx="4" fill="#F0B98C"/><circle cx="60" cy="47" r="13" fill="#F8CDA3"/><path d="M47.4 47.7C45.4 37 52.6 31.4 60 31.4s14.6 5.6 12.6 16.3C70.4 41.6 66 39.7 60 39.7s-10.4 1.9-12.6 8z" fill="#33475C"/><circle cx="55.4" cy="48.4" r="1.35" fill="#33475C"/><circle cx="64.6" cy="48.4" r="1.35" fill="#33475C"/><path d="M56.6 53.6c2 1.5 4.8 1.5 6.8 0" stroke="#33475C" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+                  <ul class="pspec">
+                    <li><b>MF検査（感染症／精子機能）</b>＋結果レポート付き</li>
+                    <li>初期費用 <b>48,400円</b>（税込）</li>
+                    <li>保管料 月2,780円／年払い30,600円（<b>月額換算2,550円</b>）</li>
+                  </ul>
+                </div>
+                <div class="offer">今なら：検査費用 実質0円／14日以内返送で初月保管料0円</div>
+                <a class="cta">標準プランを選ぶ</a>
+              </div>
+              <div class="lpcard">
+                <div class="head"><span class="ptag">スマートサブ</span></div>
+                <div class="pcatch">初期費用なし！気軽に始めたい人に！</div>
+                <div class="prow">
+                  <svg class="ill" viewBox="0 0 120 92" aria-hidden="true"><rect width="120" height="92" rx="10" fill="#CFE3F2"/><path d="M0 38C26 26 52 48 82 34c15-7 30-4 38 1v57H0z" fill="#AACBE8"/><path d="M0 58c30-13 58 7 90-5 12-4 22-3 30 2v37H0z" fill="#7FAAD6"/><g stroke="#fff" stroke-width="3" opacity=".5" stroke-linecap="round"><path d="M92 8l16 16"/><path d="M100 4l16 16"/><path d="M108 0l16 16"/></g><path d="M34 92c0-14.5 11-20.5 26-20.5S86 77.5 86 92z" fill="#fff"/><path d="M60 73.5l-2.4 3 1.2 12 1.2 2.2 1.2-2.2 1.2-12z" fill="#3D74AE"/><path d="M53 71.5l7 5 7-5" fill="none" stroke="#D8E4EE" stroke-width="2"/><rect x="54.5" y="57" width="11" height="10.5" rx="4" fill="#F0B98C"/><circle cx="60" cy="47" r="13" fill="#F8CDA3"/><path d="M47.4 47.7C45.4 37 52.6 31.4 60 31.4s14.6 5.6 12.6 16.3C70.4 41.6 66 39.7 60 39.7s-10.4 1.9-12.6 8z" fill="#33475C"/><circle cx="55.4" cy="48.4" r="1.35" fill="#33475C"/><circle cx="64.6" cy="48.4" r="1.35" fill="#33475C"/><path d="M56.6 53.6c2 1.5 4.8 1.5 6.8 0" stroke="#33475C" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+                  <ul class="pspec">
+                    <li>初期費用・MF検査 <b>なし</b></li>
+                    <li>保管料 月2,980円／年払い33,000円（月額換算2,750円）</li>
+                  </ul>
+                </div>
+                <a class="cta ghost">スマートサブを選ぶ</a>
+              </div>
+            </div>
+            <div class="dots"><span class="on"></span><span></span><span></span></div>
+            <div class="comparelink">料金を比較する（縦一覧で表示）▸</div>
+          </div>
+        </div></div>
+        <div class="cap">
+          <span class="cstep">STEP 1 ─ プラン選択（横カルーセル）</span>
+          <h5>スクロールを減らし、1枚に集中させる</h5>
+          <ul>
+            <li><span class="n">1</span><b>標準を1枚目固定＋オススメ</b>。2枚目以降の視認率低下は、広めのpeek・ドット・「料金を比較する」縦一覧切替で補完</li>
+            <li><span class="n">2</span>カード内は「どんな人向けか」→仕様→オファー→CTAの順。価格は月額換算を併記し総額初出しショックを回避</li>
+            <li><span class="n">3</span><b>U-25の扱い</b>：カルーセル上部の「25歳以下の方はこちら」リンク＋入力の生年月日で再判定（診断・年齢質問は置かない）</li>
+            <li class="data"><span class="n">◎</span>生年月日で25歳以下と判明した場合は、契約前にU-25プランへの切替を提案（価格・条件は§9）</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="unit" style="width:420px;flex-basis:420px">
+        <div class="noteblock">
+          <h4>現行LPとの差分（意図的な変更点）</h4>
+          <ul>
+            <li><b>現行LP</b>：「まずはここから！」＝スマートサブスクが先頭＋オススメ表示。<b>本設計は標準をカルーセル1枚目に固定＋オススメへ変更</b>＝インサイト仮説7-1（品質確認ニーズが本体・標準:サブ=7:3）に基づく。AB2・AB4で検証</li>
+            <li><b>名称対応</b>：検査つき標準プラン＝現行「標準プラン」／スマートサブ＝「スマートサブスクプラン」／5年・10年 長期プラン＝「お得に安心一括プラン」／U-25＝「25歳以下限定のお得なプラン」</li>
+            <li><b>価格表記</b>：現行LP（miraifamily.jp・2026-08-12閲覧）の税込表記を反映。オファー適用後の価格・条件は未確定（§9）</li>
+          </ul>
+        </div>
+        <div class="noteblock" style="margin-top:14px">
+          <h4>オファー帯の推奨構成（採算と全12案は SEC 08）</h4>
+          <ul>
+            <li><b>常設</b>：検査費用 実質0円＝検査価値のオファー化＋原価0の知覚価値（無地梱包・結果スピード）</li>
+            <li><b>行動報酬</b>：初月保管料0円は「キット到着後14日以内の返送」条件＝返送歩留まりに原資を張る</li>
+            <li><b>月次ローテ</b>：今月の検査枠 残り◯名 or 期限つきで「今やる理由」を作る（実態ベース）</li>
+            <li><b>温存</b>：初期費用◯円OFF（現金値引き）は最後の弾</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ================= SEC 04 : 申込入力 ================= -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="no">SEC 04 / STEP 2–3</span><h2>申込情報入力 — 2ステップ（電話・メール・クーポン・備考レス）</h2><span class="tag">削除4項目＝LP内決済化で不要に</span>
+    </div>
+    <p class="sec-lead">契約・決済をLP内で完結する方針（STEP 4–5）に伴い、<b>メール（旧・決済案内の生命線）と電話番号を撤去</b>し、入力を2ステップに圧縮。クーポン・ご要望・クッション画面も廃止する（ご要望は完了後のLINEで受ける）。順序原則は維持：<b>最初の個人情報は生年月日</b>（誕生日回答95.1% vs 名前入力で約半数離脱・BOTCHAN）。※領収書・契約書控え・検査結果の連絡はLINEへ移管するため、LINE未追加者のフォロー手段が前提論点（§9）。</p>
+
+    <div class="row">
+
+      <!-- STEP2 -->
+      <div class="unit">
+        <span class="corner teal">生年月日 → 氏名の順</span>
+        <div class="device"><div class="scr h700">
+          <div class="statusbar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+          <div class="appbar"><span class="avmark"><svg class="favt" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 49c0-10.5 7.2-14.5 16-14.5s16 4 16 14.5z" fill="#fff"/><rect x="20" y="25.5" width="8" height="8.5" rx="3" fill="#F0B98C"/><circle cx="24" cy="19" r="10.5" fill="#F8CDA3"/><path d="M13.6 19.5C12 11 17.8 6.5 24 6.5s12 4.5 10.4 13c-1.8-4.8-5.4-6.3-10.4-6.3s-8.6 1.5-10.4 6.3z" fill="#33475C"/><circle cx="20.2" cy="19.8" r="1.15" fill="#33475C"/><circle cx="27.8" cy="19.8" r="1.15" fill="#33475C"/><path d="M21.3 24.2c1.6 1.3 3.8 1.3 5.4 0" stroke="#33475C" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></span><span class="t">お申込み情報の入力（1/2）</span><span class="x">✕</span></div>
+          <div class="prog"><div class="pstep done"><div class="dot"></div><div class="lbl">プラン</div></div><div class="pstep on"><div class="dot"></div><div class="lbl">申込情報</div></div><div class="pstep "><div class="dot"></div><div class="lbl">契約</div></div><div class="pstep "><div class="dot"></div><div class="lbl">決済</div></div><div class="pstep "><div class="dot"></div><div class="lbl">完了</div></div></div>
+          <div class="chat">
+            <p class="formnote">約2分で完了します。お支払いは最後に内容を確認してから。</p>
+            <div class="formcard">
+              <div class="fitem">
+                <div class="flbl">生年月日 <span class="req">必須</span></div>
+                <div class="frow3">
+                  <div class="finput filled">1994年 <span class="car">▾</span></div>
+                  <div class="finput filled">6月 <span class="car">▾</span></div>
+                  <div class="finput filled">12日 <span class="car">▾</span></div>
+                </div>
+                <div class="why">年齢確認とお申込み条件の確認に使用します</div>
+              </div>
+              <div class="fitem">
+                <div class="flbl">お名前 <span class="req">必須</span></div>
+                <div class="finput filled">山田 太郎</div>
+              </div>
+              <div class="fitem">
+                <div class="flbl">フリガナ <span class="req">必須</span></div>
+                <div class="finput filled">ヤマダ タロウ <span class="ok">✓</span></div>
+                <div class="why">お名前から自動で入力されます（修正できます）</div>
+              </div>
+              <a class="cta" style="margin-top:2px">次へ（お届け先の入力）</a>
+            </div>
+            <div class="reassure"><span class="lk">🔒</span>入力情報は検査キット発送・本人確認のみに使用</div>
+          </div>
+        </div></div>
+        <div class="cap">
+          <span class="cstep">STEP 2 ─ 生年月日 → お名前 → フリガナ</span>
+          <h5>電話・メールを置かない最小構成</h5>
+          <ul>
+            <li><span class="n">1</span>匿名→実名の境界をプルダウン（生年月日）で踏ませる。お名前は実フォーム準拠の1欄＋<b>フリガナはオートカナで実質入力ゼロ</b></li>
+            <li><span class="n">2</span>連絡先入力ステップ自体を削除＝旧3画面→2画面。氏名の入力値はSTEP 4の電子署名に自動転記される（再入力なし）</li>
+            <li class="data"><span class="n">AB</span>AB7：名前先頭（旧・実フォーム準拠）vs 生年月日先頭（本案）</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- STEP3 -->
+      <div class="unit">
+        <div class="device"><div class="scr h780">
+          <div class="statusbar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+          <div class="appbar"><span class="avmark"><svg class="favt" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 49c0-10.5 7.2-14.5 16-14.5s16 4 16 14.5z" fill="#fff"/><rect x="20" y="25.5" width="8" height="8.5" rx="3" fill="#F0B98C"/><circle cx="24" cy="19" r="10.5" fill="#F8CDA3"/><path d="M13.6 19.5C12 11 17.8 6.5 24 6.5s12 4.5 10.4 13c-1.8-4.8-5.4-6.3-10.4-6.3s-8.6 1.5-10.4 6.3z" fill="#33475C"/><circle cx="20.2" cy="19.8" r="1.15" fill="#33475C"/><circle cx="27.8" cy="19.8" r="1.15" fill="#33475C"/><path d="M21.3 24.2c1.6 1.3 3.8 1.3 5.4 0" stroke="#33475C" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></span><span class="t">お申込み情報の入力（2/2）</span><span class="x">✕</span></div>
+          <div class="prog"><div class="pstep done"><div class="dot"></div><div class="lbl">プラン</div></div><div class="pstep on"><div class="dot"></div><div class="lbl">申込情報</div></div><div class="pstep "><div class="dot"></div><div class="lbl">契約</div></div><div class="pstep "><div class="dot"></div><div class="lbl">決済</div></div><div class="pstep "><div class="dot"></div><div class="lbl">完了</div></div></div>
+          <div class="chat">
+            <div class="formcard">
+              <div class="fitem">
+                <div class="flbl">住所 <span class="req">必須</span></div>
+                <div class="frow2">
+                  <div class="finput filled">150-0041</div>
+                  <div class="zipbtn">郵便番号から住所を入力</div>
+                </div>
+                <div class="finput filled" style="margin-top:7px">東京都渋谷区神南1-2-3</div>
+                <div class="finput" style="margin-top:7px">建物名・部屋番号（任意）</div>
+                <div class="why">検査キットのお届け先に使用します（無地梱包・品名記載なし）</div>
+              </div>
+              <div class="regionchip">✓ サービス対象地域です（関東）<small>対象地域を確認</small></div>
+              <div class="chk mini"><span class="box">✓</span><span>サービス対象地域について確認しました</span></div>
+              <div class="chk mini"><span class="box off">✓</span><span>お荷物の送付先を上記と別の住所にする</span></div>
+              <div class="planchip">
+                <span class="pk">選択中</span><span class="pv">検査つき標準プラン</span><span class="chg">変更</span>
+              </div>
+              <a class="cta" style="margin-top:2px">同意・契約へ進む</a>
+            </div>
+            <div class="reassure"><span class="lk">🔒</span>入力情報は検査キット発送・本人確認のみに使用</div>
+          </div>
+        </div></div>
+        <div class="cap">
+          <span class="cstep">STEP 3 ─ 住所／対象地域／プラン確認</span>
+          <h5>削除した項目の行き先を設計してから消す</h5>
+          <ul>
+            <li><span class="n">1</span>対象地域は住所直後に<b>郵便番号で自動判定</b>（全入力後の対象外発覚を防ぐ）。実フォームでは最下部だった</li>
+            <li><span class="n">2</span>希望プランはSTEP 1の選択を自動反映（欄を廃止）。クーポンは廃止（オファー自動適用）・ご要望は完了後LINEで受付</li>
+            <li><span class="n">3</span>プライバシー注記（無地梱包）を住所の添え書きに＝この商材の隠れ離脱理由への回答</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 実フォーム対応マップ -->
+      <div class="unit" style="width:420px;flex-basis:420px">
+        <div class="noteblock">
+          <h4>実フォーム（同意フォーム）→ v8再配置マップ</h4>
+          <ul>
+            <li><b>サービス約款（利用規約）の確認</b> → STEP 4 契約画面（電子署名）へ統合</li>
+            <li><b>お名前／フリガナ</b> → STEP 2（生年月日の後）。1欄＋オートカナ</li>
+            <li><b>メールアドレス</b> → <b>撤去</b>（決済・控え・結果連絡はbot内＋LINEへ移管 ※§9）</li>
+            <li><b>電話番号</b> → <b>撤去</b>（配送連絡・本人確認の代替可否は§9）</li>
+            <li><b>住所／お荷物の送付先</b> → STEP 3（郵便番号自動入力・送付先変更は折りたたみ）</li>
+            <li><b>生年月日</b> → STEP 2 <b>先頭</b>（プルダウン）</li>
+            <li><b>希望プラン</b> → STEP 1の選択を自動反映（入力欄を廃止）</li>
+            <li><b>クーポンコード</b> → <b>廃止</b>（オファーは自動適用）</li>
+            <li><b>サービス対象地域の確認</b> → STEP 3 住所直後で自動判定</li>
+            <li><b>備考欄</b> → 完了後のLINEトークで受付（保管本数追加など）</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ================= SEC 05 : 同意・契約→決済 ================= -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="no">SEC 05 / STEP 4–5</span><h2>同意・契約（電子署名）→ 決済 — LP内で完結</h2><span class="tag">特商法：総額・期間・解約方法の明示は省略不可</span>
+    </div>
+    <p class="sec-lead">旧方針（申込完了→メールで決済・契約）を廃し、<b>契約と決済をbot内に統合</b>する。契約画面＝内容確認＋同意チェック＋電子署名を1画面に集約し、<b>署名は入力済みの氏名を自動転記・ユーザーはチェックと1タップのみ</b>。決済画面＝Apple Pay／Google Payを第一導線に、カード入力は第二導線。「決済は発生しません」の反復に代わる安心装置は<b>「お支払いは最後に内容を確認してから」の予告×3</b>と、決済直前の総額再掲・暗号化表記。※添付の現行署名フロー（署名者氏名・メール入力→署名リンクをメール送付）のままではメールレスが成立しないため、<b>画面内埋め込み＋事前入力APIへの置換が前提条件</b>（§9）。</p>
+
+    <div class="row">
+
+      <!-- STEP4 契約 -->
+      <div class="unit">
+        <span class="corner teal">署名は転記済み・チェックのみ</span>
+        <div class="device"><div class="scr h780">
+          <div class="statusbar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+          <div class="appbar"><span class="avmark"><svg class="favt" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 49c0-10.5 7.2-14.5 16-14.5s16 4 16 14.5z" fill="#fff"/><rect x="20" y="25.5" width="8" height="8.5" rx="3" fill="#F0B98C"/><circle cx="24" cy="19" r="10.5" fill="#F8CDA3"/><path d="M13.6 19.5C12 11 17.8 6.5 24 6.5s12 4.5 10.4 13c-1.8-4.8-5.4-6.3-10.4-6.3s-8.6 1.5-10.4 6.3z" fill="#33475C"/><circle cx="20.2" cy="19.8" r="1.15" fill="#33475C"/><circle cx="27.8" cy="19.8" r="1.15" fill="#33475C"/><path d="M21.3 24.2c1.6 1.3 3.8 1.3 5.4 0" stroke="#33475C" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></span><span class="t">同意・契約</span><span class="x">✕</span></div>
+          <div class="prog"><div class="pstep done"><div class="dot"></div><div class="lbl">プラン</div></div><div class="pstep done"><div class="dot"></div><div class="lbl">申込情報</div></div><div class="pstep on"><div class="dot"></div><div class="lbl">契約</div></div><div class="pstep "><div class="dot"></div><div class="lbl">決済</div></div><div class="pstep "><div class="dot"></div><div class="lbl">完了</div></div></div>
+          <div class="chat">
+            <p class="formnote">内容の確認と、契約への同意（電子署名）をお願いします。</p>
+            <div class="formcard">
+              <div class="cfitem"><span class="k">プラン</span><span class="v">検査つき標準プラン（1年）</span></div>
+              <div class="cfitem"><span class="k">適用オファー</span><span class="v">検査費用 実質0円 ほか<small>（構成はSEC 08／金額確定後に反映）</small></span></div>
+              <div class="cfitem"><span class="k">総額</span><span class="v"><b>79,000円</b><small>（税込）初期費用48,400円＋保管料 年払い30,600円</small></span></div>
+              <div class="cfitem"><span class="k">契約期間</span><span class="v">1年（更新時は事前にご案内）</span></div>
+              <div class="cfitem"><span class="k">解約方法</span><span class="v">マイページ・お電話で<br>いつでも手続き可能</span></div>
+              <div class="cfitem"><span class="k">お支払い</span><span class="v">このあと決済ステップで確定<small>Apple Pay／Google Pay・カード対応</small></span></div>
+              <div class="tokusho">※ 総額・期間・解約方法の明示＝特商法要件（省略不可）</div>
+              <div class="checks" style="margin-top:10px;padding-top:12px;border-top:1px dashed #E4EBF1">
+                <div class="chk"><span class="box">✓</span><span><a>利用契約書（全文を読む）</a>の内容に同意します</span></div>
+                <div class="chk"><span class="box">✓</span><span><a>個人情報の取り扱い</a>に同意します</span></div>
+              </div>
+              <div class="signbox" style="margin-top:10px">
+                <span class="sglbl">電子署名</span>
+                <div class="sgrow">✍ 署名者：山田 太郎<span class="ok">転記済み ✓</span></div>
+                <div class="sgnote">ご入力内容を自動反映（再入力不要）・不可視署名／締結記録はクラウド保管</div>
+              </div>
+              <a class="cta" style="margin-top:12px">同意して署名し、決済へ進む</a>
+            </div>
+          </div>
+        </div></div>
+        <div class="cap">
+          <span class="cstep">STEP 4 ─ 同意・契約（電子署名を画面内で）</span>
+          <h5>署名を「入力ゼロ」にする</h5>
+          <ul>
+            <li><span class="n">1</span>現行の署名フロー（氏名・メール入力 → 署名リンクをメールで受け取る）を<b>画面内埋め込み＋事前入力に置換</b>：不可視署名＋テキスト欄はAPIで申込値を自動転記。ユーザーはチェック2つ＋1タップのみ</li>
+            <li><span class="n">2</span>総額（特商法4点）を見た同じ画面で承諾・署名＝「承諾時に条件が提示されていた」証跡を作りやすい</li>
+            <li><span class="n">3</span>実フォーム最上段の約款チェックはここに統合（入力前に契約感を出さない）</li>
+            <li><span class="n">4</span>スマートサブ選択時は解約精算金の条件明示が必要（§9）／埋め込み署名の実装可否・法的運用も§9</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- STEP5 決済 -->
+      <div class="unit">
+        <span class="corner mark">Pay 1タップが第一導線</span>
+        <div class="device"><div class="scr h700">
+          <div class="statusbar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+          <div class="appbar"><span class="avmark"><svg class="favt" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 49c0-10.5 7.2-14.5 16-14.5s16 4 16 14.5z" fill="#fff"/><rect x="20" y="25.5" width="8" height="8.5" rx="3" fill="#F0B98C"/><circle cx="24" cy="19" r="10.5" fill="#F8CDA3"/><path d="M13.6 19.5C12 11 17.8 6.5 24 6.5s12 4.5 10.4 13c-1.8-4.8-5.4-6.3-10.4-6.3s-8.6 1.5-10.4 6.3z" fill="#33475C"/><circle cx="20.2" cy="19.8" r="1.15" fill="#33475C"/><circle cx="27.8" cy="19.8" r="1.15" fill="#33475C"/><path d="M21.3 24.2c1.6 1.3 3.8 1.3 5.4 0" stroke="#33475C" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></span><span class="t">お支払い</span><span class="x">✕</span></div>
+          <div class="prog"><div class="pstep done"><div class="dot"></div><div class="lbl">プラン</div></div><div class="pstep done"><div class="dot"></div><div class="lbl">申込情報</div></div><div class="pstep done"><div class="dot"></div><div class="lbl">契約</div></div><div class="pstep on"><div class="dot"></div><div class="lbl">決済</div></div><div class="pstep "><div class="dot"></div><div class="lbl">完了</div></div></div>
+          <div class="chat">
+            <div class="paysum"><span>検査つき標準プラン（1年）</span><b>79,000円<small style="font-size:9px;font-weight:400">（税込）</small></b></div>
+            <a class="paybtn"> Pay で支払う</a>
+            <div class="ordiv">または カードで支払う</div>
+            <div class="formcard">
+              <div class="fitem">
+                <div class="flbl">カード番号 <span class="req">必須</span></div>
+                <div class="finput filled">4242 4242 4242 4242 <span class="ok">✓</span></div>
+              </div>
+              <div class="frow2">
+                <div class="fitem" style="flex:1">
+                  <div class="flbl">有効期限</div>
+                  <div class="finput filled">12 / 28</div>
+                </div>
+                <div class="fitem" style="flex:1">
+                  <div class="flbl">セキュリティコード</div>
+                  <div class="finput filled">•••</div>
+                </div>
+              </div>
+              <div class="fitem">
+                <div class="flbl">カード名義</div>
+                <div class="finput filled">TARO YAMADA（自動転記）</div>
+              </div>
+              <a class="cta" style="margin-top:2px">79,000円を支払う</a>
+            </div>
+            <div class="reassure"><span class="lk">🔒</span>カード情報は暗号化して送信・当社サーバーに保存されません（決済は現行どおりStripeで処理／3Dセキュア2.0対応）</div>
+          </div>
+        </div></div>
+        <div class="cap">
+          <span class="cstep">STEP 5 ─ 決済（bot内完結）＝真のCV地点</span>
+          <h5>カード手入力を「第二導線」に格下げする</h5>
+          <ul>
+            <li><span class="n">1</span>カード入力は新たな最難関。<b>Apple Pay／Google Payの1タップを第一導線</b>に置けるかが決済完了率の支配変数（実装可否は§9）</li>
+            <li><span class="n">2</span>名義はローマ字転記でプリフィル。かご落ち時は画面内リトライ＋中断復帰リンク（メールレスのため復帰手段の設計が必須・§9）</li>
+            <li><span class="n">3</span>成果地点が「決済完了」に寄る＝クライアントとの成果定義・レベニューシェア条件を再整理する材料になる（§9）</li>
+            <li class="data"><span class="n">◎</span>旧動線の「申込→メール決済」離脱10%＋メール未達リスクがこのステップ統合で構造的に消える</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <div class="unit" style="width:420px;flex-basis:420px">
+        <div class="noteblock">
+          <h4>決済手段の設計 — Stripeは継続、変えるのは「見せ方」</h4>
+          <ul>
+            <li><b>レイヤーの整理</b>：Stripe＝決済代行（ゲートウェイ）、Apple Pay／Google Pay・クレカ＝決済手段で対立しない。ウォレットは<b>Stripeの標準機能として有効化できる</b>（Express Checkout・追加手数料なし）。現状の課題はStripeではなく「メールの決済リンク＋カード手入力」という見せ方</li>
+            <li><b>Apple Pay／Google Pay（第一導線）</b>：カード番号・名義・有効期限の手入力ゼロ／FaceID等の生体認証が本人認証を兼ね、<b>3Dセキュアの追加入力がほぼ発生しない</b>／カード番号が加盟店を通らないトークン方式＝不正・チャージバックが少なく、番号を打ちたくない心理にも効く</li>
+            <li><b>カード手入力（第二導線）</b>：ウォレット未登録者を拾うカバレッジ最大手段・継続課金の王道。ただし<b>2025年3月からEC加盟店は3Dセキュア2.0が原則義務化</b>＝手入力にはワンタイム認証の摩擦が乗る（Pay優先の追い風）</li>
+            <li><b>注意点</b>：LINE・Instagram等の<b>アプリ内ブラウザではApple Payボタンが表示されない場合がある</b> → 配信面ごとのin-appブラウザ比率を事前確認（§9）。カードフォームは常設してフォールバック</li>
+            <li><b>コンビニ払い・PayPay等</b>：入金待ち離脱・継続課金との相性・手数料の制約から主軸にしない。拡張はバックログ扱い</li>
+            <li><b>確認事項（§9）</b>：BOTCHAN内へのStripe Elements埋め込み可否／継続課金のトークン保存（Apple Pay初回決済→以後の自動課金）の運用</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ================= SEC 06 : 完了後動線 ================= -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="no">SEC 06 / STEP 6</span><h2>完了 — 決済後はLINEが「手続きの続き」</h2><span class="tag">キット発送通知・検査結果・相談＝LINEに集約</span>
+    </div>
+    <p class="sec-lead">決済まで完了しているため、完了画面のCTAは<b>LINE追加ただ1つ</b>。お知らせ登録ではなく、<b>キット発送通知・検査結果の受け取り・コンシェルジュ相談に必要な「手続きの続き」</b>として提示する（従来の実質必須化がより自然になる）。旧メールリレー設計（v7）は廃止し、リマインド・領収書・契約書控えの送達はLINEへ移管。LINE未追加者のフォロー（控え・結果連絡の代替手段）は§9で確定する。</p>
+
+    <div class="row">
+
+      <!-- STEP6 完了 -->
+      <div class="unit">
+        <span class="corner teal">CTAはLINEただ1つ</span>
+        <div class="device"><div class="scr h640">
+          <div class="statusbar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+          <div class="appbar"><span class="avmark"><svg class="favt" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 49c0-10.5 7.2-14.5 16-14.5s16 4 16 14.5z" fill="#fff"/><rect x="20" y="25.5" width="8" height="8.5" rx="3" fill="#F0B98C"/><circle cx="24" cy="19" r="10.5" fill="#F8CDA3"/><path d="M13.6 19.5C12 11 17.8 6.5 24 6.5s12 4.5 10.4 13c-1.8-4.8-5.4-6.3-10.4-6.3s-8.6 1.5-10.4 6.3z" fill="#33475C"/><circle cx="20.2" cy="19.8" r="1.15" fill="#33475C"/><circle cx="27.8" cy="19.8" r="1.15" fill="#33475C"/><path d="M21.3 24.2c1.6 1.3 3.8 1.3 5.4 0" stroke="#33475C" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></span><span class="t">お申込み完了</span><span class="x">✕</span></div>
+          <div class="prog"><div class="pstep done"><div class="dot"></div><div class="lbl">プラン</div></div><div class="pstep done"><div class="dot"></div><div class="lbl">申込情報</div></div><div class="pstep done"><div class="dot"></div><div class="lbl">契約</div></div><div class="pstep done"><div class="dot"></div><div class="lbl">決済</div></div><div class="pstep on"><div class="dot"></div><div class="lbl">完了</div></div></div>
+          <div class="donewrap relay">
+            <div class="big">✓</div>
+            <h3>お申込みとお支払いが<br>完了しました。</h3>
+            <p>検査キットの発送準備を開始します。</p>
+            <div class="stcard hot">
+              <div class="sthead"><span class="stno">最後のステップ</span><span class="sttime">約10秒</span></div>
+              <div class="sttl">LINEで「専用サポート窓口」を追加</div>
+              <ul class="stben">
+                <li><b>検査キット発送の通知</b>をこのトークで受け取れます</li>
+                <li>感染症・精子機能の<b>検査結果について、コンシェルジュに個別相談</b></li>
+                <li>手続き・保管のご質問、領収書・契約書控えの受け取り</li>
+              </ul>
+              <a class="cta line" style="padding:12px;font-size:13px;border-radius:11px">LINEで窓口を追加する</a>
+              <div class="stmicro">お名前・申込番号は自動で連携されます（入力不要）</div>
+            </div>
+            <div class="skiplink">あとで追加する（発送・結果のご連絡手段が限られます）</div>
+          </div>
+        </div></div>
+        <div class="cap">
+          <span class="cstep">STEP 6 ─ 完了画面</span>
+          <h5>「手続きの続き」フレーミングで実質必須化</h5>
+          <ul>
+            <li><span class="n">1</span>決済済みなので迷わせる要素ゼロ＝<b>唯一のCTA</b>。発送通知・結果受け取りに必要な窓口として提示（お知らせ登録にしない）</li>
+            <li><span class="n">2</span>skip導線は極小で残置（強要回避）。未追加者への控え・結果連絡の代替手段は§9で必ず設計</li>
+            <li><span class="n">3</span>領収書・契約書控えの送達チャネルもLINEトーク（電子交付の要件確認は§9）</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- LINE talk -->
+      <div class="unit">
+        <span class="corner" style="background:#52BD51">T+0 自動応答</span>
+        <div class="device"><div class="scr h700">
+          <div class="statusbar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+          <div class="lbar"><span class="back">‹</span><span class="oa"><svg class="favt" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 49c0-10.5 7.2-14.5 16-14.5s16 4 16 14.5z" fill="#fff"/><rect x="20" y="25.5" width="8" height="8.5" rx="3" fill="#F0B98C"/><circle cx="24" cy="19" r="10.5" fill="#F8CDA3"/><path d="M13.6 19.5C12 11 17.8 6.5 24 6.5s12 4.5 10.4 13c-1.8-4.8-5.4-6.3-10.4-6.3s-8.6 1.5-10.4 6.3z" fill="#33475C"/><circle cx="20.2" cy="19.8" r="1.15" fill="#33475C"/><circle cx="27.8" cy="19.8" r="1.15" fill="#33475C"/><path d="M21.3 24.2c1.6 1.3 3.8 1.3 5.4 0" stroke="#33475C" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></span><span>専用サポート窓口</span><span class="vbadge">✓ 認証済</span></div>
+          <div class="lchat">
+            <div class="lmsg"><span class="lav"><svg class="favt" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 49c0-10.5 7.2-14.5 16-14.5s16 4 16 14.5z" fill="#fff"/><rect x="20" y="25.5" width="8" height="8.5" rx="3" fill="#F0B98C"/><circle cx="24" cy="19" r="10.5" fill="#F8CDA3"/><path d="M13.6 19.5C12 11 17.8 6.5 24 6.5s12 4.5 10.4 13c-1.8-4.8-5.4-6.3-10.4-6.3s-8.6 1.5-10.4 6.3z" fill="#33475C"/><circle cx="20.2" cy="19.8" r="1.15" fill="#33475C"/><circle cx="27.8" cy="19.8" r="1.15" fill="#33475C"/><path d="M21.3 24.2c1.6 1.3 3.8 1.3 5.4 0" stroke="#33475C" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></span><div class="lbb">山田 太郎さま、お申込みとお支払いありがとうございます。<br>ここが、あなたの<b>専用サポート窓口</b>です。<br><br>申込番号：MF-260813-XXXX<br>（自動で連携済み・入力不要です）</div></div>
+            <div class="ltime">17:02</div>
+            <div class="lcard">
+              <div class="lct"><span class="lk">現在のステータス</span><b>検査キットを発送準備中</b><br>発送が完了したら、このトークでお知らせします。到着後は<b>14日以内のご返送で初月保管料0円</b>が適用されます。</div>
+              <div class="lbtn">発送状況を確認する</div>
+            </div>
+            <div class="ltime">17:02</div>
+            <div class="lcard">
+              <div class="lct"><span class="lk">このトークでできること</span>・検査結果について、不安な点・ご不明点を<b>コンシェルジュに個別相談</b><br>・領収書・契約書控えの受け取り<br>・手続き・保管のご質問はいつでも</div>
+              <div class="lbtn">相談をはじめる</div>
+            </div>
+          </div>
+        </div></div>
+        <div class="cap">
+          <span class="cstep">LINE ─ 追加直後の自動応答（発送・返送・結果のハブ）</span>
+          <h5>登録した価値を即時に提示する</h5>
+          <ul>
+            <li><span class="n">1</span>T+0で<b>発送ステータス</b>を見せ「追加した意味」を即実感させる（決済誘導カードは決済済みのため廃止）</li>
+            <li><span class="n">2</span><b>14日返送オファー（SEC 08）をリマインドに接続</b>＝申込→返送の歩留まり改善をLINEが担う</li>
+            <li><span class="n">3</span>要配慮情報（検査結果本文）はトークに直接流さず「到着通知→専用ページ」型（§9）</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="grid2">
+      <div class="noteblock">
+        <h4>ライフサイクル通知設計（発送 → 返送 → 結果）</h4>
+        <ul>
+          <li><b>T+0（追加直後）</b>：発送準備ステータス＋できることの提示</li>
+          <li><b>発送時</b>：発送通知＋返送期限の案内（14日以内返送で初月0円＝オファー連動）</li>
+          <li><b>T+10日 未返送</b>：返送リマインド＋採取の不安相談導線（再採取サポートの案内）</li>
+          <li><b>結果到着</b>：到着通知 → 専用ページで確認（トーク本文に結果は載せない）→ 不安があればコンシェルジュへ</li>
+          <li><b>以降</b>：更新前案内・相談窓口として継続＝解約抑止・LTV接点</li>
+        </ul>
+      </div>
+      <div class="noteblock">
+        <h4>表現・法務チェック（実装前に確定）</h4>
+        <ul>
+          <li><b>コンシェルジュ相談の範囲</b>：医学的判断・診断と受け取られない表現に（医師法・医療広告ガイドライン）</li>
+          <li><b>検査結果は要配慮個人情報になり得る</b>：トークは到着通知のみ・本文は専用ページで</li>
+          <li><b>実質必須化の限界</b>：LINE非利用者向けの控え・結果連絡の代替手段（SMS／郵送等）を必ず用意（§9）</li>
+          <li><b>領収書・契約書控えのLINE送付</b>：電子交付の要件・改ざん防止の担保を確認（§9）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SEC 07 : 共通UI要素 ================= -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="no">SEC 07</span><h2>離脱抑止の共通UI要素</h2><span class="tag">全画面共通仕様</span>
+    </div>
+    <div class="grid2">
+      <div class="noteblock">
+        <h4>共通4原則</h4>
+        <ul>
+          <li><b>1. 進捗表示を常時出す</b>：プラン→申込情報→契約→決済→完了（残りステップの不安を消す）</li>
+          <li><b>2. 「お支払いは最後に内容を確認してから」を3箇所で予告</b>：下記マップ参照。請求が発生するのは決済画面のみ</li>
+          <li><b>3. セキュリティ文言</b>：「入力情報は検査キット発送・本人確認のみに使用」＋決済画面では「カード情報は暗号化・当社サーバーに非保持」</li>
+          <li><b>4. 「入力項目は◯つだけ」は実数一致時のみ</b>：不一致なら「約2分で完了」に統一</li>
+        </ul>
+      </div>
+      <div class="noteblock">
+        <h4>「お支払いは最後」予告マップ（×3）</h4>
+        <div class="repeat4">
+          <span><i>①</i>FV下（箇条書き内）</span>
+          <span><i>②</i>プラン画面（bot吹き出し）</span>
+          <span><i>③</i>入力ヘッダ（bot吹き出し）</span>
+        </div>
+        <ul style="margin-top:14px">
+          <li>旧「決済は発生しません」×4はメール決済前提の装置。bot内決済化に伴い<b>「支払いの所在を隠さず、最後だと予告する」</b>設計に転換（隠すと決済画面での裏切りになり、かご落ちを増やす）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SEC 08 : オファー設計 ================= -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="no">SEC 08 / OFFER</span><h2>オファー設計 — 採算の考え方と拡張案</h2><span class="tag">オファー原資は広告費と同じ財布＝実質CPOで評価</span>
+    </div>
+    <p class="sec-lead">オファーは1件獲得のための変動費。評価は<b>実質CPO＝メディアCPO＋オファー原価/件</b>で行い、オファーによるCVR改善がメディアCPOを下げる幅と、オファー原価を比較して採算を判断する。この商材の構造課題は<b>「将来リスク型＝今やる理由が構造的に弱い」</b>ことなので、①不安を潰す ②今やる理由を作る ③支払いハードルを下げる ④行動の質（返送・LTV）を上げる——の4象限で幅出しした。<b>数値はすべて仮置き</b>（検査原価・再採取発生率・返送率はクライアント確認事項）。</p>
+
+    <div class="grid2">
+      <div class="noteblock">
+        <h4>採算の決め方（3つの原則）</h4>
+        <ul>
+          <li><b>① 元を取る必要CVR倍率 ＝ CPO ÷（CPO − オファー原価/件）</b>。例：メディアCPO 60,000円・検査原価 12,000円と仮置きすると 60,000÷48,000＝<b>1.25倍</b>（CVR 15.2%→19.0%でトントン）。一方、再採取サポートの期待原価は 約450円/件（キット3,000円×発生率15%仮）＝必要倍率1.008倍で<b>CVR＋0.1ptでペイ</b>。保証型・期待値型が優先上位に来るのはこの構造のため</li>
+          <li><b>② 出ていくのは定価ではなく原価</b>。検査48,400円を実質0円にしても失うのは検査の原価だけ。オファーは<b>知覚価値÷原価のレシオ</b>で選ぶ：現金値引き＝常に1倍／検査バンドル＝3〜5倍／保証型＝期待値ベースで10倍超もあり得る</li>
+          <li><b>③ オファー設計＝「原価の安い知覚価値」を探すゲーム</b>。プライバシー配慮・結果スピード・年齢トリガーのような原価ほぼ0の知覚価値から先に載せる</li>
+        </ul>
+      </div>
+      <div class="noteblock">
+        <h4>無料オファーの副作用と法務ライン</h4>
+        <ul>
+          <li><b>参照価格の毀損</b>：常設で0円を見せると定価に戻せなくなる。強い無料系は「今月限定」「プラン申込で実質0円」等の<b>期限・条件つき</b>で運用する</li>
+          <li><b>顧客の質への副作用</b>：無料で入った層は検体を返送しない・早期解約する傾向が出やすい。副作用はCVRではなく<b>検体返送率とLTV</b>に出る → AB3の副指標に検体返送率を追加（本版で反映済み）</li>
+          <li><b>法務ライン</b>：自社役務のバンドル値引き整理なら景品規制の外になり得る／物品のおまけ扱いなら総付景品＝取引価額の20%以内／「実質0円」の根拠となる通常価格には販売実績が必要（§9）</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tblwrap">
+    <table class="ab">
+      <tr><th style="width:210px">オファー案</th><th>中身</th><th style="width:250px">採算メモ（原価・ペイ条件）</th><th style="width:230px">狙い・bot内の接続</th></tr>
+      <tr><th colspan="4" style="background:#24507C;font-weight:700;letter-spacing:.06em">A. 不安を潰す（行動ハードル ↓）</th></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>1. 検査費用 実質0円</b>（既出・常設本命）</td><td>MF検査（48,400円相当）をプラン申込で実質無料</td><td>原資＝検査原価のみ（仮12,000円 → 必要CVR×1.25）</td><td>検査価値インサイト直撃。「状態を確認したい」ニーズに直結</td></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>2. 再採取サポート1回無料</b>（既出）</td><td>採取失敗時の再キット無料</td><td>期待原価 約450円/件（3,000円×発生率15%仮）＝<b>CVR＋0.1ptでペイ</b></td><td>「ちゃんと採れるか」不安に直結</td></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>3. 保管適性保証</b>（新）</td><td>検査の結果、凍結保管に適さない場合は保管料を全額返金（検査費用のみ負担）</td><td>期待原価＝不適合発生率次第で小。返金条件の法務・オペ設計が前提（§9）</td><td>「預けて意味あるのか」を制度で潰す最強のリスクリバーサル。検査後キャンセル保証より成果定義とズレにくい</td></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>4. プライバシー配慮の明文化</b>（新）</td><td>無地梱包・品名記載なし・ポスト返送</td><td><b>原価ほぼ0</b>（既存オペの明文化）</td><td>「家族・同居人に知られたくない」という隠れ離脱理由への回答。オファー帯に載る知覚価値</td></tr>
+      <tr><th colspan="4" style="background:#24507C;font-weight:700;letter-spacing:.06em">B. 今やる理由を作る（緊急性）</th></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>5. 月間検査枠</b>（新）</td><td>「今月の検査キット発送枠 残り◯名」</td><td>原価0。ラボの実キャパ準拠＝実態ベースで虚偽なし（有利誤認回避のため実数運用）</td><td>将来リスク型商材に欠けている「今やる理由」を実態で作る</td></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>6. 初月保管料0円の期限運用</b>（既出改良）</td><td>常設にせず「今月申込限定」で月次ローテ</td><td>原価 2,780円/件（月払い保管料）</td><td>参照価格を守りながら締切を作る</td></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>7. 年齢トリガー</b>（新）</td><td>「34歳のうちにはじめる」等の誕生日前訴求</td><td>原価0（入力の生年月日で出し分け可能）</td><td>「精子は今が一番若い」と完全整合のパーソナル緊急性。生年月日取得後の画面・LINE配信で使用</td></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>8. 結果スピード</b>（新）</td><td>「申込から最短◯日で検査結果」</td><td>原価0（オペ実績の明示のみ）</td><td>締切の代わりに「すぐ手に入る」で背中を押す</td></tr>
+      <tr><th colspan="4" style="background:#24507C;font-weight:700;letter-spacing:.06em">C. 支払いハードルを下げる</th></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>9. 初期費用の分割・手数料無料</b>（新）</td><td>48,400円を「月あたり◯千円」に分割</td><td>原資＝分割手数料 数%のみ</td><td>U-25案の分割を全年齢に展開。「初期費用」ニーズに応え標準比率7:3を守る</td></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>10. 後払い・結果同時請求</b>（新・優先度低）</td><td>検査結果の案内とあわせて請求</td><td>未回収リスクあり＝回収設計が前提</td><td>メール決済動線と親和はあるが優先度は低</td></tr>
+      <tr><th colspan="4" style="background:#24507C;font-weight:700;letter-spacing:.06em">D. 行動の質・LTVに効かせる</th></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>11. 14日以内返送で初月保管料0円</b>（新・隠れ本命）</td><td>キット到着から14日以内の返送を条件に初月0円を付与</td><td>原価 2,780円/件が<b>返送率改善で回収</b>される自己資金型</td><td>裏ボトルネック「申込→検体返送」の歩留まりに原資を張る。無料化の副作用（返送しない層）への対抗策そのもの</td></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>12. 追加保管セット割</b>（新）</td><td>2セット目（5本）を◯%OFF</td><td>原資＝割引分（客単価増で相殺）</td><td>実フォーム備考欄「保管数追加（5本ごと）」＝既存ニーズ。「長期」ニーズ・LTV側に効く</td></tr>
+    </table>
+    </div>
+
+    <div class="noteblock" style="margin-top:14px">
+      <h4>推奨の組み方 — 3層構成</h4>
+      <ul>
+        <li><b>常設1本</b>：検査費用 実質0円（検査価値のオファー化・安売り感なし）＋原価0の知覚価値（プライバシー配慮・結果スピード）を常時添える</li>
+        <li><b>行動報酬1本</b>：初月保管料0円を<b>「14日以内返送」条件に付け替え</b>＝CVRと返送率を同じ原資で両取りする</li>
+        <li><b>月次ローテ1本</b>：月間検査枠 or 期限つき運用で「今やる理由」を作る（実態ベース・虚偽なし）</li>
+        <li><b>温存</b>：初期費用◯円OFF（現金値引き）はレシオ1倍＋参照価格毀損のため最後の弾として保持</li>
+        <li><b>ニーズ別の出し分け</b>：状態を確認したい→1＋3／初期費用を抑えたい→9＋1／手続きが不安→2＋4／長期で安心→12。診断は置かないため、出し分けは<b>プランカード内の訴求行・記事面ごとのFV差し替え・完了後LINE配信</b>で行う</li>
+        <li><b>クライアント確認事項（試算の前提）</b>：検査の原価／再採取の発生率／現状の検体返送率——この3つが決まれば上表の仮置きを実数に置換できる</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SEC 09 : CVR20%仮説 ================= -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="no">SEC 09 / KPI</span><h2>なぜこの設計でCVR 20%を狙えるのか</h2><span class="tag">試算は決済完了ベース／CVR分子の正式定義は§9</span>
+    </div>
+    <p class="sec-lead">20%の妥当性は3段で説明する。<b>① 現行のセルバンク動線（LP＋同意フォーム＋LINE相談）の構造課題をどう変えるか・なぜ変えるか</b>、<b>② その変更が、サブスクでオンライン申込が完結する類似商材（ウォーターサーバー等）の定石と一致しているか</b>、<b>③ 成立時の到達水準はいくつか</b>。数値は保証値ではなく、基準値取得後に実測へ置き換える前提の設計目標。</p>
+
+    <div class="noteblock" style="margin-top:20px">
+      <h4>結論</h4>
+      <ul>
+        <li><b>主根拠は「現行動線の構造課題を1つずつ潰した」こと</b>：プラン比較の丸投げ／LINE相談ホップ／約12項目の一括フォーム／規約チェックが先頭／最初の入力がお名前——に加え、v10では<b>診断レス直行・入力6項目2画面・署名の氏名転記・bot内決済</b>で、申込から決済までのホップ自体を消した（下表）</li>
+        <li><b>その型は同カテゴリの定石と一致する</b>：参照するDENBA・BOTCHAN実測はbot／チャットフォーム導入のサブスク型オンライン申込商材の数値。「決済までオンライン完結＋Payワンタップ」は通販・サブスクの標準型で、本商材はキット郵送＝設置日がないため決済を後ろへ送る必然性がそもそも薄い</li>
+        <li><b>成立時の到達水準（決済完了ベース）</b>：保守 9.1%／基準 20.1%／ストレッチ 30.2%。<b>20%は基準シナリオで到達</b>。旧設計（入力完了ベース基準15.2%）との構造差＝診断レス（×0.85のロス消滅）＋入力削減＋決済ホップ消滅の合算。支配変数は<b>①FV通過と⑤決済完了</b>で、下振れ時の着手先も#1（FV表現）・#6（決済導線）に定めている</li>
+        <li><b>前提と検証</b>：参照値は他商材の実測で本商材での再現は未検証。LINE追加15%（DIO級50%）の乖離には記事側の変数も含まれる。だから最初に「最悪未来FV×直行×現行オファー」の基準値取得を置き、下表を実測で置換しながら20%へ収束させる</li>
+      </ul>
+    </div>
+
+    <div class="tblwrap">
+    <table class="ab">
+      <tr><th style="width:120px">観点</th><th>現行動線（LP＋同意フォーム）</th><th>本設計（bot一体型 v8）</th><th>変える理由・根拠</th></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>入口・選ばせ方</b></td><td>縦長LPでプラン比較を読者に委ねる（サブスク先頭・標準・U-25／一括はアコーディオン）</td><td>最悪未来型FV → 利用者の声 → 標準先頭カルーセル（診断なし・1ページLP）</td><td>比較疲れ＋「今やろう」動機の欠落が15%の主因。最悪未来の想起と、選択負荷を設計側が引き取る構成で応える</td></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>申込までの距離</b></td><td>主CTAが「公式LINE追加（ご相談）」＝申込の前に相談を挟む</td><td>タップ1回でプラン→そのまま申込・決済。LINEは完了後の手続き窓口へ再配置</td><td>「ボタンを押すだけ」で15%は相談ホップが距離を作っている証左。記事通過済みの高期待値読者を最短で成果へ</td></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>入力形式</b></td><td>同意フォーム1枚に約12項目を一括入力</td><td>6項目×2画面（電話・メール・クーポン・備考を廃止）、1問1答</td><td>BOTCHAN実測：選択式91〜97%・名前で約半数離脱。bot内決済化でメール決済リンク自体が不要に</td></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>契約感の出る順番</b></td><td>規約チェックが最上段＝入力前に契約感が先頭に来る</td><td>契約は総額提示と同じ最終盤へ。署名は氏名を自動転記しチェックのみ</td><td>区間①の警戒「契約させられそう」を先頭で刺激しない。承諾は条件を見た画面で取り、再入力ゼロで通す</td></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>氏名の位置</b></td><td>実質最初の入力項目がお名前</td><td>生年月日 → 氏名の順（AB7で検証）</td><td>BOTCHAN実測：名前入力で約半数離脱 vs 誕生日回答95.1%</td></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>プラン指定・対象地域</b></td><td>プランはプルダウンで自己選択／対象地域確認は最下部</td><td>プランは選択カードを自動反映（欄を廃止）／地域は住所直後に自動判定</td><td>入力削減と選択ミス防止／全部入力した後の対象外発覚（最悪の離脱・クレーム）を防止</td></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>価格と決済</b></td><td>LPで総額まで一覧提示 → 申込後にLINE・メールで決済案内</td><td>月額換算を先行し総額は契約画面。決済は<b>bot内（Pay優先）で完結</b>→完了後LINE</td><td>DENBA実測：19万円初出しネガの回避。決済ホップの消滅＝旧設計のメールリレー離脱（約10%＋未達リスク）を構造的にゼロ化</td></tr>
+    </table>
+    </div>
+
+    <div class="grid2">
+      <div class="noteblock">
+        <h4>類似商材（サブスク型オンライン申込：ウォーターサーバー等）との比較</h4>
+        <ul>
+          <li><b>参照実測の出どころが同カテゴリ</b>：DENBA・BOTCHANの数値は、bot／チャットフォームを導入したサブスク型オンライン申込商材での実測。異業種の借用ではなく同じ構造の商材で成果が確認されている型への乗り換え</li>
+          <li><b>定石との一致</b>：チャット型1問1答／月額表示の先行／初月0円系オファー／対象エリアの事前確認／<b>Payワンタップ決済までオンライン完結</b>——通販・サブスクの標準フルセットを踏襲</li>
+          <li><b>決済位置の整理</b>：ウォーターサーバーの「申込→設置日→決済」型の後段分離は設置工事があるための構造。本商材はキット郵送で設置がなく、<b>決済を後ろへ送る必然性が薄い＝bot内完結が型として正しい</b></li>
+          <li><b>本商材ならではの上乗せ</b>：医療系検査を含む高関与・センシティブ商材のため、「お支払いは最後」の予告反復・署名内容の透明化・完了後のLINE窓口を追加実装</li>
+          <li><b>意識すべき相違</b>：即時ニーズ（引越し等）ではなく将来リスク型＝入口の動機づけ比重が大きい → 最悪未来型FVの表現強度（#1）が最重要</li>
+        </ul>
+      </div>
+      <div class="noteblock">
+        <h4>試算の使い方 — 担保の構えと下振れリスク</h4>
+        <ul>
+          <li><b>初手からABは並走させない</b>：本命構成で基準値取得 → 乖離の大きい区間から #1（FV表現）・#6（決済導線）→ #2・#3 の順に着手。支配変数（FV通過・決済完了）に注力を集中</li>
+          <li><b>後段の保険の再設計</b>：bot内決済化でメールリレー救済が消える → 決済画面離脱者への<b>かご落ちリトライ</b>（再訪導線・LINE経由リマインド）を§9で設計する</li>
+          <li><b>下振れ要因</b>：(a) 参照実測は他商材のもの (b) Pay非対応環境・3Dセキュア認証での離脱 (c) 最悪未来表現が媒体考査・表現審査で弱められた場合のFV弱体化</li>
+          <li><b>対応</b>：(a)は基準値先行で吸収 (b)はカード入力フォールバック＋入力項目の最少化 (c)は表現の強・中・弱3案を事前に用意し差し替え（#1）</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tblwrap">
+    <table class="ab">
+      <tr><th>ファネル区間（成立時の到達水準・試算）</th><th style="width:70px">保守</th><th style="width:70px">基準</th><th style="width:90px">ストレッチ</th><th>根拠となる実測・設計</th></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>① LP表示→プラン到達（FV通過）</b></td><td>30%</td><td>45%</td><td>55%</td><td>DENBA実測：起動〜最初の入力で75〜78%離脱（＝通過22〜25%）。<b>タップ1回化＋最悪未来の想起</b>で改善を狙う最大の仮説。下振れ時はバックログ#1（表現強度）へ</td></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>② プラン選択（横スライドカルーセル）</b></td><td>75%</td><td>82%</td><td>88%</td><td>1画面1プラン＋標準アンカー固定で選択負荷を最小化。直前の「利用者の声」（実名・年齢帯別）が自分ごと化の裏づけとして選択を後押し。診断レスのため記事面の質に依存（面ごとにEPCで管理）</td></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>③ 入力完了（6項目・2画面）</b></td><td>55%</td><td>65%</td><td>70%</td><td>電話・メール・クーポン・備考の廃止＋生年月日先行＋プラン自動反映。BOTCHAN実測（名前半数離脱／誕生日95.1%）とEFO移植。下振れ時は#7へ</td></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>④ 契約（署名転記・チェックのみ）</b></td><td>92%</td><td>95%</td><td>97%</td><td>氏名の再入力ゼロ・チェック2点のみ。埋め込み署名＋事前入力APIが実装前提（§9）</td></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>⑤ 決済完了（bot内・Pay優先）</b></td><td>80%</td><td>88%</td><td>92%</td><td>旧設計の「申込→メール→決済」ホップが消滅（メール経由の離脱約10%＋未達リスクをゼロ化）。Payワンタップが上限を決める。下振れ時は#6へ</td></tr>
+      <tr><td style="font-family:'Noto Sans JP',sans-serif;color:#333F4A"><b>到達CVR（①×②×③×④×⑤）</b></td><td><b>9.1%</b></td><td><b>20.1%</b></td><td><b>30.2%</b></td><td><b>20%＝基準シナリオで到達。旧設計（基準15.2%・入力完了ベース）との差＝診断レス＋入力削減＋決済ホップ消滅の合算</b></td></tr>
+    </table>
+    </div>
+    <p class="sec-lead" style="margin-top:14px">補足：本表は<b>決済完了ベース</b>の試算。CVR分子を従来定義（入力完了）で維持する場合は ①×②×③ ＝ 保守12.4%／基準24.0%／ストレッチ33.9% が分子CVRに相当し、④×⑤（＝73.6〜89.2%）が決済完了率にあたる。<b>分子の正式定義（入力完了か署名完了か決済完了か）は成果定義・レベニューシェア条件に直結するため§9で確定</b>させる。数値はプランニング仮説であり、基準値取得後に実測で置換して運用する。</p>
+  </div>
+</section>
+
+<!-- ================= SEC 10 : 改善バックログ ================= -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="no">SEC 10</span><h2>検証・改善バックログ（AB候補）</h2><span class="tag">初手からABは並走させない／主指標：記事CTAクリック→決済完了CVR（§9）</span>
+    </div>
+    <p class="sec-lead">本命構成（最悪未来FV × 直行 × 現行オファー）でまず基準値を取得し、実測がKPI表（SEC 09）の「基準」を下回った区間から該当項目に着手する。検証時はmCV数を揃えて比較（社内ルール）。副指標：入力完了率・標準プラン比率・EPC・プラン別LTV・検体返送率。</p>
+    <div class="tblwrap">
+    <table class="ab">
+      <tr><th style="width:36px">#</th><th style="width:140px">テーマ</th><th>A</th><th>B</th><th style="width:220px">主に見る指標</th></tr>
+      <tr><td>1</td><td><b>FV表現強度</b></td><td>最悪未来型「欲しい日に、間に合わない」<span class="hon">本命</span></td><td>事実型「老化は不可逆」（表現を一段弱めた差し替え案）</td><td>FV通過率／プラン到達率／CVR</td></tr>
+      <tr><td>2</td><td><b>標準プランの見せ方</b></td><td>料金軸「総額を抑えやすい」</td><td>検査軸「確認してから保管できる」<span class="hon">本命</span></td><td>標準プラン選択率／CVR／決済完了率</td></tr>
+      <tr><td>3</td><td><b>オファー</b></td><td>初期費用◯円OFF</td><td>検査費用実質0円（＋再採取サポート）</td><td>CVR／CPA／EPC／プラン別LTV／検体返送率</td></tr>
+      <tr><td>4</td><td><b>プラン並び順</b></td><td>標準先頭固定</td><td>Q3回答別レコメンド並び替え</td><td>プラン選択率／標準比率／CVR</td></tr>
+      <tr><td>5</td><td><b>決済予告文言</b></td><td>「お支払いは最後に内容を確認してから」<span class="hon">本命</span></td><td>「ご入力は約2分で完了します」</td><td>プラン選択→入力開始率／入力完了率</td></tr>
+      <tr><td>6</td><td><b>決済導線</b></td><td>Apple Pay／Google Pay 先頭<span class="hon">本命</span></td><td>カード入力 先頭</td><td>決済完了率／決済所要時間／かご落ち率</td></tr>
+      <tr><td>7</td><td><b>入力順序</b></td><td>名前先頭（旧・実フォーム準拠）</td><td>生年月日先頭（本案）<span class="hon">本命</span></td><td>氏名到達率／入力完了率</td></tr>
+    </table>
+    </div>
+    <p class="sec-lead" style="margin-top:14px"><b>運用方針</b>：初手からABは並走させない。①本命構成（最悪未来FV × 直行 × 現行オファー）で基準値取得 → ②実測がSEC 09の「基準」を下回った区間から着手（FV通過が低い→#1／入力完了→#7／決済完了→#6） → ③オファー（#3）・見せ方（#2・#4・#5）は原資と法務の確定後。#1のB案（事実型）は、最悪未来表現が媒体考査・表現審査で通らなかった場合の差し替え先を兼ねる</p>
+  </div>
+</section>
+
+<!-- ================= SEC 11 : 未確定論点 ================= -->
+<section class="sec" style="padding-bottom:10px">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="no">SEC 11</span><h2>未確定論点（実装前に確定が必要）</h2><span class="tag">Notion 4-3詳細 §9より</span>
+    </div>
+    <div class="todo">
+      <div>検査費用の表示価格（「実質0円」表記の根拠となる通常価格）と原価</div>
+      <div>再採取サポートのオペレーション実現性・条件設計</div>
+      <div>検査後キャンセル保証の返金条件・法務確認・成果定義への影響</div>
+      <div>サブスクに検査を付けるか（付けない場合は標準との差別化を明確化）</div>
+      <div>U-25プランへのオファー適用範囲</div>
+      <div>（v8で廃止方針）メール決済案内の件名・送信タイミング → bot内決済へ移行</div>
+      <div>決済リンクのLINE配信可否（決済代行の仕様・なりすまし/フィッシング対策）</div>
+      <div>コンシェルジュの対応範囲・体制（医療的相談の線引き・対応者の資格明記／医師法・医療広告GL）</div>
+      <div>検査結果の通知チャネル設計（要配慮個人情報の取扱い：LINEは到着通知のみ等）</div>
+      <div>U-25プランの価格・条件の確認（LPアコーディオン内・要確認）</div>
+      <div>スマートサブの解約精算金：条件と確認画面での表示方法（LP注記あり）</div>
+      <div>郵便番号による対象地域の自動判定（対象外時の一時滞在案内の出し分け・文言）</div>
+      <div>クーポンコード欄の要否（オファー自動適用が原則／常時露出は離脱要因）</div>
+      <div>フリガナ自動入力（オートカナ）ほかEFO実装の技術要件</div>
+      <div>同意・確認の1画面統合：規約全文の提示方法（画面内リンク／展開）と承諾ログの持ち方（法務）</div>
+      <div>オファー採算の前提数値の実測確認（検査原価・再採取発生率・検体返送率）</div>
+      <div>保管適性保証（検査不適合時の返金）の条件設計・発生率・法務確認</div>
+      <div>bot内決済の実装方式（BOTCHAN Payment／Stripe等・Apple Pay/Google Pay対応・3Dセキュア・かご落ちリトライ）</div>
+      <div>電子署名の画面内埋め込み・事前入力API・不可視署名の運用（メール送付リンク方式からの置換可否）</div>
+      <div>メールレス運用：領収書・契約書控え・検査結果通知の送達（LINE移管の可否／LINE未追加者へのSMS・郵送等の代替）</div>
+      <div>電話レス運用の可否（配送連絡・本人確認・与信の代替手段）</div>
+      <div>CVR分子の再定義（入力完了 → 署名完了／決済完了：成果定義・レベニューシェア条件への影響）</div>
+      <div>最悪未来訴求の表現審査（薬機法・媒体考査・断定回避の文言設計・「35歳」等の数値の出典確認）</div>
+      <div>利用者の声の掲載許諾・引用要約の承認（実名・肖像・競技実績の表記／体験談は「個人の感想」注記）</div>
+    </div>
+    <p class="sec-lead" style="margin-top:16px">※ おまけ型オファーは総付景品＝取引価額の20%以内（景表法）。サブスク時の取引価額の解釈は法務確認（既存論点）。本モック内の価格・「実質0円」等の表記は確定後に差し替え。</p>
+  </div>
+</section>
+
+<footer class="doc-foot">
+  <div class="wrap">
+    <div><b>HDXセルバンク｜bot一体型LP UIパターン案 v10</b>　出典：Notion「bot一体型LP UI設計＋プラン・オファー設計案（4-3詳細）」</div>
+    <div>価格・フォーム項目は現行LP（miraifamily.jp・2026-08-12閲覧）準拠／オファー適用後価格・U-25価格は未確定／画面内テキストは実装時に法務（薬機法・景表法・特商法）確認のうえ確定</div>
+  </div>
+</footer>
+
+</body>
+</html>
