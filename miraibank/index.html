@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>精子凍結みらいバンク® ｜ 一番若い「今」を、残しておく。</title>
+<meta name="robots" content="noindex,nofollow"><!-- TODO: 本番公開時に削除 -->
+<meta name="description" content="精子も、卵子と同じように老化します。数年後の「そろそろ」に間に合わせられるのは、いちばん若い“今”を凍結して残しておくことだけ。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   精子凍結みらいバンク® / bot一体型LP v10
+   LP本体のみ（デバイスフレーム・注釈・statusbarは除去）
+   動線：FV → 利用者の声 → プラン ｜ 申込1/2 → 2/2 → 契約 → 決済 → 完了
+   ========================================================= */
+:root{
+  --teal:#3D74AE; --teal-deep:#2A5A8C; --teal-ink:#173553;
+  --bl:#4A80BE; --ice:#E9F2F9; --ice-soft:#F4F9FD; --sky2:#CFE3F2;
+  --grn:#52BD51; --org:#F39420; --mark:#D96C2C;
+  --amber:#B4690E; --amber-soft:#FFF3E0;
+  --ink:#24303B; --sub:#47555F; --line:#E0EAF2;
+  --lp-max:480px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  background:#EDF2F7;color:var(--ink);
+  font-family:'Noto Sans JP',"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased;
+}
+img,svg{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:3px solid #F39420;outline-offset:2px;border-radius:6px}
+
+/* ===== app shell ===== */
+.app{
+  max-width:var(--lp-max);margin:0 auto;background:#fff;min-height:100vh;
+  box-shadow:0 0 40px -12px rgba(23,53,83,.18);overflow:hidden;position:relative;
+}
+
+/* ===== header ===== */
+.appbar{
+  position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:9px;
+  padding:11px 16px;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);
+  border-bottom:1px solid #EAF0F5;
+}
+.appbar .avmark{width:27px;height:27px;border-radius:50%;background:var(--bl);flex-shrink:0;overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
+.appbar .avmark svg{width:88%;height:88%}
+.appbar .t{font-family:'Zen Maru Gothic',sans-serif;font-size:15px;font-weight:900;color:var(--teal-ink);letter-spacing:.01em}
+.rmark{font-style:normal;font-size:9px;vertical-align:super;font-weight:700}
+
+/* ===== screens（ステップ切替） ===== */
+.screen{display:none}
+.screen.active{display:block}
+
+/* ===== progress ===== */
+.prog{display:flex;padding:12px 14px 10px;background:#FBFDFE;border-bottom:1px solid #F0F5F9}
+.pstep{flex:1;text-align:center;position:relative}
+.pstep .dot{width:9px;height:9px;border-radius:50%;background:#D9E3EC;margin:0 auto 5px;position:relative;z-index:2}
+.pstep .lbl{font-size:10.5px;color:#A7B4C0;white-space:nowrap}
+.pstep::before{content:"";position:absolute;top:4px;left:-50%;width:100%;height:1.5px;background:#E4EBF1}
+.pstep:first-child::before{display:none}
+.pstep.done .dot{background:var(--teal);opacity:.45}
+.pstep.done::before{background:#C3D7EA}
+.pstep.on .dot{background:var(--teal);box-shadow:0 0 0 4px rgba(61,116,174,.16)}
+.pstep.on .lbl{color:var(--teal);font-weight:700}
+.pstep.on::before{background:#C3D7EA}
+
+/* ===== 共通パーツ ===== */
+.cta{
+  display:block;width:100%;background:var(--teal);color:#fff;border-radius:13px;
+  padding:17px 12px;text-align:center;font-size:17px;font-weight:900;letter-spacing:.03em;
+  box-shadow:0 6px 14px -6px rgba(42,90,140,.55);font-family:'Zen Maru Gothic',sans-serif;
+  transition:transform .12s ease,box-shadow .12s ease;
+}
+.cta:active{transform:translateY(1px);box-shadow:0 3px 8px -4px rgba(42,90,140,.55)}
+.cta.ghost{background:#fff;color:var(--teal-deep);border:1.5px solid #A9C6E4;box-shadow:none;font-weight:700}
+.cta.line{background:var(--grn);box-shadow:0 6px 14px -6px rgba(82,189,81,.55)}
+.cta.big{
+  font-size:20px;padding:19px 40px 19px 14px;border-radius:16px;
+  background:linear-gradient(180deg,#5490CE,#2F5F94);
+  box-shadow:0 10px 24px -8px rgba(42,90,140,.7);position:relative;
+  animation:ctapulse 2.2s ease-in-out infinite;
+}
+.cta.big::after{content:"›";position:absolute;right:18px;top:50%;transform:translateY(-54%);font-size:26px;font-weight:900;opacity:.95}
+@keyframes ctapulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+@media (prefers-reduced-motion:reduce){.cta.big{animation:none}}
+
+.reassure{display:flex;align-items:center;gap:7px;justify-content:center;font-size:12px;color:#93A3B1;padding-top:10px;line-height:1.6}
+.midashi{text-align:center;font-family:'Zen Maru Gothic',sans-serif;font-weight:900;color:var(--teal-ink);font-size:18px}
+.midashi::after{content:"";display:block;width:40px;height:3px;background:var(--teal);margin:7px auto 0;border-radius:2px}
+.formnote{font-family:'Zen Maru Gothic',sans-serif;font-weight:700;font-size:13px;color:#41586E;line-height:1.75;text-align:center}
+.body-pad{padding:16px 16px 24px;background:linear-gradient(180deg,#FDFEFF 0%,#F2F8FC 100%);display:flex;flex-direction:column;gap:13px}
+
+/* ===== 1. FV ===== */
+.fv{
+  padding:26px 22px 24px;text-align:center;position:relative;overflow:hidden;
+  background:linear-gradient(175deg,#FFFFFF 0%,#F0F7FC 55%,#DFEEF9 100%);
+}
+.fv .eyebrow{font-family:'Zen Maru Gothic',sans-serif;font-size:13px;font-weight:900;color:var(--teal);letter-spacing:.05em;margin-bottom:11px}
+.fv h1{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:25px;line-height:1.55;letter-spacing:.01em;color:var(--teal-ink);margin-bottom:10px}
+.fv h1 em{font-style:normal;background:linear-gradient(transparent 68%,rgba(74,128,190,.32) 68%)}
+.fv .sub{font-family:'Zen Maru Gothic',sans-serif;font-weight:700;font-size:14px;line-height:1.85;color:#41586E;margin-bottom:14px}
+.fv .sub b{color:var(--teal-ink);font-weight:900}
+.fv .ill{width:152px;margin:0 auto 14px}
+.fv ul{list-style:none;display:flex;flex-direction:column;gap:6px;text-align:left;width:fit-content;margin:0 auto}
+.fv li{font-size:13px;color:#41586E;display:flex;gap:8px;align-items:flex-start;font-weight:500;line-height:1.6}
+.fv li::before{content:"✓";color:var(--teal);font-weight:900;flex-shrink:0}
+.deco{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:13.5px;color:var(--teal-ink);margin:16px 0 9px}
+
+/* ===== 2. 利用者の声 ===== */
+.vfeat{background:var(--ice);border-radius:16px;padding:14px;display:flex;gap:12px;align-items:flex-start}
+.vph{width:66px;height:66px;border-radius:14px;flex-shrink:0;overflow:hidden;background:var(--sky2);display:flex;align-items:flex-end;justify-content:center}
+.vph svg{width:92%;height:92%}
+.vbadge{display:inline-block;background:#fff;color:var(--teal);font-size:10.5px;font-weight:900;border-radius:6px;padding:3px 8px;margin-bottom:5px;font-family:'Zen Maru Gothic',sans-serif}
+.vq{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:14.5px;color:var(--teal-ink);line-height:1.65}
+.vwho{font-size:11px;color:#47555F;margin-top:5px;line-height:1.6}
+.vrow{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:2px 16px 4px;scrollbar-width:none}
+.vrow::-webkit-scrollbar{display:none}
+.vcard{flex:0 0 190px;background:#fff;border:1px solid #DCE7F0;border-radius:13px;padding:11px 12px;scroll-snap-align:start}
+.vcard .vq{font-size:12.5px;font-weight:700;color:#33475C;line-height:1.65}
+.dots{display:flex;gap:5px;justify-content:center}
+.dots i,.dots span{width:7px;height:7px;border-radius:50%;background:#C9D8E6;transition:width .2s ease}
+.dots i.on,.dots span.on{background:var(--teal);width:18px;border-radius:4px}
+.vmore{display:block;text-align:center;font-size:12px;color:var(--teal);text-decoration:underline;text-underline-offset:2px;font-weight:600}
+
+/* ===== 3. プラン ===== */
+.u25link{display:block;text-align:center;font-size:12.5px;font-weight:700;color:var(--teal);text-decoration:underline;text-underline-offset:2px}
+.caro{display:flex;gap:11px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:2px 16px 6px;scrollbar-width:none}
+.caro::-webkit-scrollbar{display:none}
+.caro .lpcard{flex:0 0 86%;min-width:86%;scroll-snap-align:center}
+.caro.stacked{display:flex;flex-direction:column;overflow:visible;scroll-snap-type:none;margin:0;padding:0}
+.caro.stacked .lpcard{flex:none;min-width:0;width:100%}
+.lpcard{background:var(--ice);border-radius:16px;padding:14px;position:relative}
+.lpcard.rc{box-shadow:0 0 0 2px var(--teal) inset}
+.lpcard .head{display:flex;align-items:center;gap:8px;margin-bottom:9px;flex-wrap:wrap}
+.osusume{font-family:'Zen Maru Gothic',sans-serif;background:#fff;color:var(--org);font-size:12px;font-weight:900;border-radius:7px;padding:4px 10px;letter-spacing:.06em}
+.ptag{font-family:'Zen Maru Gothic',sans-serif;background:#fff;color:var(--teal-ink);font-size:13px;font-weight:900;border-radius:7px;padding:4px 11px}
+.pcatch{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:14.5px;color:var(--teal-ink);border-left:4px solid var(--teal);padding-left:9px;line-height:1.5;margin-bottom:10px}
+.prow{display:flex;gap:11px;align-items:flex-start;margin-bottom:10px}
+.prow .ill{width:98px;flex-shrink:0;border-radius:9px}
+.pspec{list-style:none;flex:1}
+.pspec li{font-size:12.5px;color:#41586E;line-height:1.6;position:relative;padding-left:13px;margin-bottom:5px}
+.pspec li::before{content:"▪";position:absolute;left:0;color:var(--teal);font-size:10px;top:1px}
+.pspec li b{color:var(--teal-ink);font-weight:700}
+.lpcard .offer{font-family:'Zen Maru Gothic',sans-serif;font-size:13px;font-weight:900;color:var(--amber);background:var(--amber-soft);border-radius:9px;padding:8px 10px;margin-bottom:10px;text-align:center;line-height:1.55}
+.lpcard .cta{padding:14px;font-size:15px;border-radius:11px}
+.comparelink{display:block;width:100%;text-align:center;font-size:13px;color:var(--teal);text-decoration:underline;text-underline-offset:2px;font-weight:600}
+
+/* ===== 4-5. フォーム ===== */
+.formcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:15px}
+.fitem .flbl{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px;margin-bottom:6px;color:var(--teal-ink)}
+.req{font-size:10px;color:#fff;background:var(--mark);border-radius:4px;padding:2px 6px;font-weight:600}
+.why{font-size:11.5px;color:#7E8FA0;margin-top:6px;position:relative;padding-left:17px;line-height:1.6}
+.why::before{content:"ⓘ";color:var(--teal);position:absolute;left:0}
+.finput,select.finput,input.finput{
+  width:100%;background:#F6FAFD;border:1.5px solid #DCE7F0;border-radius:10px;
+  padding:13px 14px;font-size:16px;color:var(--ink);font-family:inherit;line-height:1.4;
+  -webkit-appearance:none;appearance:none;
+}
+input.finput::placeholder{color:#9FB0BF}
+.finput:focus{border-color:var(--teal);background:#fff;outline:none;box-shadow:0 0 0 3px rgba(61,116,174,.14)}
+select.finput{background-image:linear-gradient(45deg,transparent 50%,#A7B4C0 50%),linear-gradient(135deg,#A7B4C0 50%,transparent 50%);background-position:calc(100% - 17px) center,calc(100% - 12px) center;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:34px}
+.frow2{display:flex;gap:9px;align-items:flex-end}
+.frow2>*{flex:1}
+.frow3{display:flex;gap:7px}
+.frow3>*{flex:1}
+.zipbtn{background:var(--teal);color:#fff;border-radius:10px;font-size:12.5px;font-weight:700;padding:13px 12px;white-space:nowrap;flex:0 0 auto}
+.static-val{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border:1.5px solid #A9C6E4;border-radius:10px;padding:13px 14px;font-size:15px}
+.ok{color:#1C9E6E;font-weight:700;font-size:12px}
+.checks{display:flex;flex-direction:column;gap:11px}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.6;cursor:pointer}
+.chk input{position:absolute;opacity:0;width:0;height:0}
+.chk .box{width:20px;height:20px;border-radius:6px;background:#fff;border:1.5px solid #B9C6D1;color:transparent;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:.12s}
+.chk input:checked+.box{background:var(--teal);border-color:var(--teal);color:#fff}
+.chk input:focus-visible+.box{outline:3px solid #F39420;outline-offset:2px}
+.chk a{color:var(--teal);text-decoration:underline;text-underline-offset:2px}
+.chk.mini{font-size:12px;color:#5E6E7C;align-items:center}
+.chk.mini .box{width:17px;height:17px;font-size:10px;border-radius:5px;margin-top:0}
+.regionchip{display:flex;align-items:center;gap:8px;background:#EAF7EE;border:1px solid #BFE3CB;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#1F7A4D;font-weight:700}
+.regionchip small{font-weight:500;color:#4E8566;margin-left:auto;text-decoration:underline;font-size:11px}
+.planchip{display:flex;align-items:center;gap:9px;background:#fff;border:1.5px solid var(--teal);border-radius:11px;padding:11px 12px}
+.planchip .pk{font-size:10.5px;font-weight:700;color:var(--teal);letter-spacing:.08em;flex-shrink:0}
+.planchip .pv{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:14.5px;color:var(--teal-ink)}
+.planchip .chg{margin-left:auto;font-size:11.5px;color:#93A3B1;text-decoration:underline;flex-shrink:0}
+
+/* ===== 6. 契約 ===== */
+.cfitem{display:flex;justify-content:space-between;gap:12px;padding:11px 2px;border-bottom:1px dashed #E4EBF1;font-size:13.5px;line-height:1.6}
+.cfitem:last-of-type{border-bottom:none}
+.cfitem .k{color:var(--sub);flex-shrink:0}
+.cfitem .v{text-align:right;font-weight:500}
+.cfitem .v b{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:18px;color:var(--teal-ink)}
+.cfitem .v small{display:block;font-size:11px;color:#93A3B1;font-weight:400;line-height:1.55}
+.tokusho{font-size:11px;color:var(--mark);font-weight:600;text-align:right;margin-top:8px;letter-spacing:.04em}
+.divider{margin-top:2px;padding-top:14px;border-top:1px dashed #E4EBF1}
+.signbox{background:var(--ice-soft);border:1.5px solid var(--teal);border-radius:13px;padding:14px 13px 12px;position:relative}
+.signbox .sglbl{position:absolute;top:-10px;left:11px;background:var(--teal);color:#fff;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:.06em}
+.signbox .sgrow{display:flex;align-items:center;gap:9px;font-size:14.5px;font-weight:700;color:var(--teal-ink)}
+.signbox .sgrow .ok{margin-left:auto}
+.signbox .sgnote{font-size:11px;color:#7E8FA0;margin-top:7px;line-height:1.6}
+
+/* ===== 7. 決済 ===== */
+.paysum{display:flex;justify-content:space-between;align-items:baseline;gap:10px;background:var(--ice);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--teal-ink)}
+.paysum b{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:20px;white-space:nowrap}
+.paysum b small{font-size:11px;font-weight:400}
+.paybtn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;background:#111;color:#fff;border-radius:13px;padding:16px 10px;font-size:17px;font-weight:700;font-family:'Zen Maru Gothic',sans-serif}
+.paybtn svg{width:17px;height:20px;fill:#fff}
+.ordiv{display:flex;align-items:center;gap:11px;font-size:11.5px;color:#93A3B1;margin:2px 0}
+.ordiv::before,.ordiv::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* ===== 8. 完了 ===== */
+.donewrap{display:flex;flex-direction:column;align-items:center;text-align:center;padding:22px 20px 30px;background:linear-gradient(180deg,#FDFEFF,#EDF5FB)}
+.donewrap .big{width:56px;height:56px;border-radius:50%;background:var(--teal);color:#fff;font-size:25px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;box-shadow:0 10px 24px -10px rgba(42,90,140,.6)}
+.donewrap h2{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:20px;margin-bottom:8px;color:var(--teal-ink);line-height:1.5}
+.donewrap p{font-size:14px;color:#41586E;line-height:1.8;margin-bottom:14px}
+.stcard{width:100%;background:#fff;border:1.5px solid #DCE7F0;border-radius:14px;padding:14px;text-align:left;margin-bottom:11px}
+.stcard.hot{border-color:var(--grn);box-shadow:0 6px 16px -8px rgba(82,189,81,.5)}
+.sthead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.stno{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.1em;color:#fff;background:var(--grn);border-radius:5px;padding:3px 9px}
+.sttime{font-size:11px;color:#A7B4C0;font-family:'IBM Plex Mono',monospace}
+.sttl{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:16px;margin-bottom:8px;line-height:1.5;color:var(--teal-ink)}
+.stben{list-style:none;display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.stben li{font-size:13px;color:#41586E;line-height:1.6;position:relative;padding-left:16px}
+.stben li::before{content:"✓";color:var(--grn);font-weight:700;position:absolute;left:0}
+.stben li b{color:var(--ink)}
+.stmicro{font-size:11px;color:#93A3B1;text-align:center;margin-top:9px}
+.skiplink{font-size:11.5px;color:#A7B4C0;text-decoration:underline;text-underline-offset:2px}
+
+/* ===== footer ===== */
+.lpfoot{background:var(--teal-ink);color:#9CBCD9;padding:22px 18px 30px;font-size:11.5px;line-height:1.9}
+.lpfoot a{color:#DCE8F2;text-decoration:underline;text-underline-offset:2px}
+.lpfoot nav{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<!-- ===== 共通SVG（アバター／イラスト） ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="favt" viewBox="0 0 48 48">
+    <path d="M8 49c0-10.5 7.2-14.5 16-14.5s16 4 16 14.5z" fill="#fff"/>
+    <rect x="20" y="25.5" width="8" height="8.5" rx="3" fill="#F0B98C"/>
+    <circle cx="24" cy="19" r="10.5" fill="#F8CDA3"/>
+    <path d="M13.6 19.5C12 11 17.8 6.5 24 6.5s12 4.5 10.4 13c-1.8-4.8-5.4-6.3-10.4-6.3s-8.6 1.5-10.4 6.3z" fill="#33475C"/>
+    <circle cx="20.2" cy="19.8" r="1.15" fill="#33475C"/><circle cx="27.8" cy="19.8" r="1.15" fill="#33475C"/>
+    <path d="M21.3 24.2c1.6 1.3 3.8 1.3 5.4 0" stroke="#33475C" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="hero" viewBox="0 0 120 92">
+    <rect width="120" height="92" rx="10" fill="#CFE3F2"/>
+    <path d="M0 38C26 26 52 48 82 34c15-7 30-4 38 1v57H0z" fill="#AACBE8"/>
+    <path d="M0 58c30-13 58 7 90-5 12-4 22-3 30 2v37H0z" fill="#7FAAD6"/>
+    <g stroke="#fff" stroke-width="3" opacity=".5" stroke-linecap="round"><path d="M92 8l16 16"/><path d="M100 4l16 16"/><path d="M108 0l16 16"/></g>
+    <path d="M34 92c0-14.5 11-20.5 26-20.5S86 77.5 86 92z" fill="#fff"/>
+    <path d="M60 73.5l-2.4 3 1.2 12 1.2 2.2 1.2-2.2 1.2-12z" fill="#3D74AE"/>
+    <path d="M53 71.5l7 5 7-5" fill="none" stroke="#D8E4EE" stroke-width="2"/>
+    <rect x="54.5" y="57" width="11" height="10.5" rx="4" fill="#F0B98C"/>
+    <circle cx="60" cy="47" r="13" fill="#F8CDA3"/>
+    <path d="M47.4 47.7C45.4 37 52.6 31.4 60 31.4s14.6 5.6 12.6 16.3C70.4 41.6 66 39.7 60 39.7s-10.4 1.9-12.6 8z" fill="#33475C"/>
+    <circle cx="55.4" cy="48.4" r="1.35" fill="#33475C"/><circle cx="64.6" cy="48.4" r="1.35" fill="#33475C"/>
+    <path d="M56.6 53.6c2 1.5 4.8 1.5 6.8 0" stroke="#33475C" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <circle cx="27" cy="24" r="11" fill="#fff"/>
+    <text x="27" y="29.5" text-anchor="middle" font-size="15" font-weight="700" fill="#4A80BE" font-family="Arial,sans-serif">?</text>
+  </symbol>
+</svg>
+
+<div class="app">
+
+  <!-- ================= HEADER ================= -->
+  <header class="appbar">
+    <span class="avmark"><svg><use href="#favt"/></svg></span>
+    <span class="t" id="appTitle">精子凍結みらいバンク<i class="rmark">®</i></span>
+  </header>
+
+  <!-- =========================================================
+       SCREEN 0 ： 縦長LP（FV → 利用者の声 → プラン）
+       ========================================================= -->
+  <main class="screen active" id="s-lp">
+
+    <!-- ---------- FV ---------- -->
+    <section class="fv">
+      <p class="eyebrow">精子も、卵子と同じように老化します</p>
+      <h1>欲しいと思ったその日に、<br><em>つくれないかもしれない。</em></h1>
+      <p class="sub">老化した精子は、<b>元に戻せません</b>。<br>数年後の「そろそろ」に間に合わせられるのは、<br>いちばん若い<b>“今”を凍結して残しておく</b>ことだけ。</p>
+      <svg class="ill" viewBox="0 0 120 92" aria-hidden="true"><use href="#hero"/></svg>
+      <ul>
+        <li>診断・質問はありません。そのままプランを確認</li>
+        <li>お支払いは、最後に内容を確認してから</li>
+      </ul>
+      <p class="deco">＼ 後悔する前に、「今」を残す ／</p>
+      <a class="cta big" href="#plans">プランを見る</a>
+      <p class="reassure"><span>🔒</span>個人情報の入力はプラン選択後です</p>
+    </section>
+
+    <!-- ---------- 利用者の声 ---------- -->
+    <section class="body-pad">
+      <h2 class="midashi">利用者の声</h2>
+
+      <div class="vfeat">
+        <span class="vph"><svg><use href="#favt"/></svg></span>
+        <!-- TODO: vph を実写真（実名掲載許諾済みのもの）に差し替え -->
+        <div>
+          <span class="vbadge">パリ2024 レスリング サモア代表</span>
+          <p class="vq">「男性にも“35歳の壁”がある。数値が正常な今のうちに、将来へ備えることが大切だと実感しました」</p>
+          <p class="vwho">赤澤 岳 様（34歳・妊活予定者）</p>
+        </div>
+      </div>
+
+      <div class="vrow" id="vrow">
+        <div class="vcard"><span class="vbadge">35歳・会社役員</span><p class="vq">35歳から機能が下がると聞き、今のうちに凍結保管。申込〜預け入れは意外なほど簡単でした</p></div>
+        <div class="vcard"><span class="vbadge">45歳・弁護士</span><p class="vq">受診なしで検査〜保管までワンストップ。状態を確認できた精子を保管している安心感</p></div>
+        <div class="vcard"><span class="vbadge">23歳・会社員</span><p class="vq">人生でいちばん若い“今”がベスト。タイムカプセルみたいで楽しみです</p></div>
+      </div>
+      <div class="dots" id="vdots"><i class="on"></i><i></i><i></i></div>
+
+      <a class="vmore" href="#">ほかの声を見る（お客様の声）</a>
+      <!-- TODO: 公式「お客様の声」ページURLを設定 -->
+      <a class="cta" href="#plans">プランを見る</a>
+    </section>
+
+    <!-- ---------- プラン ---------- -->
+    <div class="prog" id="plans">
+      <div class="pstep on"><div class="dot"></div><div class="lbl">プラン</div></div>
+      <div class="pstep"><div class="dot"></div><div class="lbl">申込情報</div></div>
+      <div class="pstep"><div class="dot"></div><div class="lbl">契約</div></div>
+      <div class="pstep"><div class="dot"></div><div class="lbl">決済</div></div>
+      <div class="pstep"><div class="dot"></div><div class="lbl">完了</div></div>
+    </div>
+
+    <section class="body-pad">
+      <h2 class="midashi">あなたへのおすすめプラン</h2>
+      <p class="formnote">左右にスワイプして選べます。お支払いは、最後に内容を確認してから。</p>
+      <a class="u25link" href="#">25歳以下の方はこちら</a>
+      <!-- TODO: U-25プラン（25歳以下限定プラン）の遷移先を設定。価格・条件は未確定（§9） -->
+
+      <div class="caro" id="caro">
+        <!-- 1枚目：標準（オススメ・固定） -->
+        <article class="lpcard rc">
+          <div class="head"><span class="osusume">オススメ！</span><span class="ptag">検査つき標準プラン</span></div>
+          <p class="pcatch">“預けられる状態か”を確認してから、お得に預けたい人に！</p>
+          <div class="prow">
+            <svg class="ill" viewBox="0 0 120 92" aria-hidden="true"><use href="#hero"/></svg>
+            <ul class="pspec">
+              <li><b>MF検査（感染症／精子機能）</b>＋結果レポート付き</li>
+              <li>初期費用 <b>48,400円</b>（税込）</li>
+              <li>保管料 月2,780円／年払い30,600円（<b>月額換算2,550円</b>）</li>
+            </ul>
+          </div>
+          <p class="offer">今なら：検査費用 実質0円／14日以内返送で初月保管料0円</p>
+          <button class="cta" data-plan="検査つき標準プラン" data-total="79000">標準プランを選ぶ</button>
+        </article>
+
+        <!-- 2枚目：スマートサブ -->
+        <article class="lpcard">
+          <div class="head"><span class="ptag">スマートサブ</span></div>
+          <p class="pcatch">初期費用なし！気軽に始めたい人に！</p>
+          <div class="prow">
+            <svg class="ill" viewBox="0 0 120 92" aria-hidden="true"><use href="#hero"/></svg>
+            <ul class="pspec">
+              <li>初期費用・MF検査 <b>なし</b></li>
+              <li>保管料 月2,980円／年払い33,000円（月額換算2,750円）</li>
+            </ul>
+          </div>
+          <button class="cta ghost" data-plan="スマートサブ" data-total="33000">スマートサブを選ぶ</button>
+        </article>
+
+        <!-- TODO: 3枚目「5年・10年 長期プラン（お得に安心一括プラン）」を追加。
+             元モックはドット3つ＝3プラン想定だがカード未作図。価格確定後に同フォーマットで追加。 -->
+      </div>
+
+      <div class="dots" id="pdots"><span class="on"></span><span></span></div>
+      <button class="comparelink" id="cmpBtn">料金を比較する（縦一覧で表示）▸</button>
+    </section>
+
+    <footer class="lpfoot">
+      <nav>
+        <a href="#">運営会社</a><a href="#">利用規約</a><a href="#">プライバシーポリシー</a><a href="#">特定商取引法に基づく表記</a><a href="#">よくあるご質問</a>
+      </nav>
+      精子凍結みらいバンク®｜表示価格はすべて税込です。<br>
+      掲載しているお客様の声は個人の感想であり、効果を保証するものではありません。
+      <!-- TODO: 事業者名・所在地・電話番号・特商法表記の実リンクを設定（省略不可） -->
+    </footer>
+  </main>
+
+  <!-- =========================================================
+       SCREEN 1 ： 申込情報の入力（1/2）
+       ========================================================= -->
+  <main class="screen" id="s-form1">
+    <div class="prog">
+      <div class="pstep done"><div class="dot"></div><div class="lbl">プラン</div></div>
+      <div class="pstep on"><div class="dot"></div><div class="lbl">申込情報</div></div>
+      <div class="pstep"><div class="dot"></div><div class="lbl">契約</div></div>
+      <div class="pstep"><div class="dot"></div><div class="lbl">決済</div></div>
+      <div class="pstep"><div class="dot"></div><div class="lbl">完了</div></div>
+    </div>
+
+    <form class="body-pad" id="form1" novalidate>
+      <p class="formnote">約2分で完了します。お支払いは最後に内容を確認してから。</p>
+      <div class="formcard">
+        <div class="fitem">
+          <div class="flbl">生年月日 <span class="req">必須</span></div>
+          <div class="frow3">
+            <select class="finput" id="by" required aria-label="生まれた年"></select>
+            <select class="finput" id="bm" required aria-label="生まれた月"></select>
+            <select class="finput" id="bd" required aria-label="生まれた日"></select>
+          </div>
+          <p class="why">年齢確認とお申込み条件の確認に使用します</p>
+        </div>
+
+        <div class="fitem">
+          <label class="flbl" for="name">お名前 <span class="req">必須</span></label>
+          <input class="finput" type="text" id="name" name="name" placeholder="山田 太郎" autocomplete="name" required>
+        </div>
+
+        <div class="fitem">
+          <label class="flbl" for="kana">フリガナ <span class="req">必須</span></label>
+          <input class="finput" type="text" id="kana" name="kana" placeholder="ヤマダ タロウ" required>
+          <p class="why">お名前から自動で入力されます（修正できます）</p>
+          <!-- TODO: オートカナ（jquery.autoKana 等）を実装。ここではJSで簡易補完 -->
+        </div>
+
+        <button type="submit" class="cta">次へ（お届け先の入力）</button>
+      </div>
+      <p class="reassure"><span>🔒</span>入力情報は検査キット発送・本人確認のみに使用</p>
+    </form>
+  </main>
+
+  <!-- =========================================================
+       SCREEN 2 ： 申込情報の入力（2/2）
+       ========================================================= -->
+  <main class="screen" id="s-form2">
+    <div class="prog">
+      <div class="pstep done"><div class="dot"></div><div class="lbl">プラン</div></div>
+      <div class="pstep on"><div class="dot"></div><div class="lbl">申込情報</div></div>
+      <div class="pstep"><div class="dot"></div><div class="lbl">契約</div></div>
+      <div class="pstep"><div class="dot"></div><div class="lbl">決済</div></div>
+      <div class="pstep"><div class="dot"></div><div class="lbl">完了</div></div>
+    </div>
+
+    <form class="body-pad" id="form2" novalidate>
+      <div class="formcard">
+        <div class="fitem">
+          <div class="flbl">住所 <span class="req">必須</span></div>
+          <div class="frow2">
+            <input class="finput" type="text" id="zip" inputmode="numeric" placeholder="150-0041" autocomplete="postal-code" required>
+            <button type="button" class="zipbtn" id="zipBtn">郵便番号から住所を入力</button>
+            <!-- TODO: 郵便番号→住所APIを接続（zipcloud 等） -->
+          </div>
+          <input class="finput" type="text" id="addr1" style="margin-top:8px" placeholder="都道府県・市区町村・番地" autocomplete="address-line1" required>
+          <input class="finput" type="text" id="addr2" style="margin-top:8px" placeholder="建物名・部屋番号（任意）" autocomplete="address-line2">
+          <p class="why">検査キットのお届け先に使用します（無地梱包・品名記載なし）</p>
+        </div>
+
+        <div class="regionchip" id="regionChip">✓ サービス対象地域です<small>対象地域を確認</small></div>
+
+        <div class="checks">
+          <label class="chk mini"><input type="checkbox" id="agreeRegion" required><span class="box">✓</span><span>サービス対象地域について確認しました</span></label>
+          <label class="chk mini"><input type="checkbox" id="otherAddr"><span class="box">✓</span><span>お荷物の送付先を上記と別の住所にする</span></label>
+        </div>
+
+        <div class="planchip">
+          <span class="pk">選択中</span><span class="pv" id="planChip2">検査つき標準プラン</span>
+          <button type="button" class="chg" data-go="s-lp">変更</button>
+        </div>
+
+        <button type="submit" class="cta">同意・契約へ進む</button>
+      </div>
+      <p class="reassure"><span>🔒</span>入力情報は検査キット発送・本人確認のみに使用</p>
+    </form>
+  </main>
+
+  <!-- =========================================================
+       SCREEN 3 ： 同意・契約（電子署名）
+       ========================================================= -->
+  <main class="screen" id="s-contract">
+    <div class="prog">
+      <div class="pstep done"><div class="dot"></div><div class="lbl">プラン</div></div>
+      <div class="pstep done"><div class="dot"></div><div class="lbl">申込情報</div></div>
+      <div class="pstep on"><div class="dot"></div><div class="lbl">契約</div></div>
+      <div class="pstep"><div class="dot"></div><div class="lbl">決済</div></div>
+      <div class="pstep"><div class="dot"></div><div class="lbl">完了</div></div>
+    </div>
+
+    <form class="body-pad" id="form3" novalidate>
+      <p class="formnote">内容の確認と、契約への同意（電子署名）をお願いします。</p>
+      <div class="formcard">
+        <div class="cfitem"><span class="k">プラン</span><span class="v" id="cfPlan">検査つき標準プラン（1年）</span></div>
+        <div class="cfitem"><span class="k">適用オファー</span><span class="v">検査費用 実質0円 ほか<small>※金額確定後に反映</small></span></div>
+        <div class="cfitem"><span class="k">総額</span><span class="v"><b id="cfTotal">79,000円</b><small>（税込）初期費用48,400円＋保管料 年払い30,600円</small></span></div>
+        <div class="cfitem"><span class="k">契約期間</span><span class="v">1年（更新時は事前にご案内）</span></div>
+        <div class="cfitem"><span class="k">解約方法</span><span class="v">マイページ・お電話で<br>いつでも手続き可能</span></div>
+        <div class="cfitem"><span class="k">お支払い</span><span class="v">このあと決済ステップで確定<small>Apple Pay／Google Pay・カード対応</small></span></div>
+        <p class="tokusho">※ 総額・期間・解約方法の明示＝特商法要件（省略不可）</p>
+
+        <div class="checks divider">
+          <label class="chk"><input type="checkbox" id="agree1" required><span class="box">✓</span><span><a href="#" target="_blank" rel="noopener">利用契約書（全文を読む）</a>の内容に同意します</span></label>
+          <label class="chk"><input type="checkbox" id="agree2" required><span class="box">✓</span><span><a href="#" target="_blank" rel="noopener">個人情報の取り扱い</a>に同意します</span></label>
+        </div>
+
+        <div class="signbox">
+          <span class="sglbl">電子署名</span>
+          <div class="sgrow">✍ 署名者：<span id="signName">—</span><span class="ok">転記済み ✓</span></div>
+          <p class="sgnote">ご入力内容を自動反映（再入力不要）・不可視署名／締結記録はクラウド保管</p>
+        </div>
+        <!-- TODO: 電子署名の画面内埋め込み＋事前入力API（現行のメール送付フローからの置換が前提・§9） -->
+
+        <button type="submit" class="cta">同意して署名し、決済へ進む</button>
+      </div>
+    </form>
+  </main>
+
+  <!-- =========================================================
+       SCREEN 4 ： お支払い
+       ========================================================= -->
+  <main class="screen" id="s-pay">
+    <div class="prog">
+      <div class="pstep done"><div class="dot"></div><div class="lbl">プラン</div></div>
+      <div class="pstep done"><div class="dot"></div><div class="lbl">申込情報</div></div>
+      <div class="pstep done"><div class="dot"></div><div class="lbl">契約</div></div>
+      <div class="pstep on"><div class="dot"></div><div class="lbl">決済</div></div>
+      <div class="pstep"><div class="dot"></div><div class="lbl">完了</div></div>
+    </div>
+
+    <form class="body-pad" id="form4" novalidate>
+      <div class="paysum"><span id="paySumPlan">検査つき標準プラン（1年）</span><b id="paySumTotal">79,000円<small>（税込）</small></b></div>
+
+      <button type="button" class="paybtn" id="walletBtn">
+        <svg viewBox="0 0 20 24" aria-hidden="true"><path d="M16.5 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.9-1.5-.1-2.8.8-3.5.8-.7 0-1.8-.8-3-.8-1.6 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.3 2.9 2.3 1.2 0 1.6-.7 3-.7 1.4 0 1.8.7 3 .7 1.2 0 2-1.1 2.8-2.2.9-1.3 1.3-2.5 1.3-2.6-.1 0-2.5-1-2.5-3.7zM13.6 4.6c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.7 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.7-1.3z"/></svg>
+        Pay で支払う
+      </button>
+      <!-- TODO: Stripe Express Checkout Element（Apple Pay／Google Pay）に置換。
+           LINE・Instagram等のアプリ内ブラウザでは非表示になる場合あり → 下のカードフォームを常設フォールバックに -->
+
+      <div class="ordiv">または カードで支払う</div>
+
+      <div class="formcard">
+        <div class="fitem">
+          <label class="flbl" for="cardno">カード番号 <span class="req">必須</span></label>
+          <input class="finput" type="text" id="cardno" inputmode="numeric" placeholder="1234 5678 9012 3456" autocomplete="cc-number" required>
+        </div>
+        <div class="frow2">
+          <div class="fitem">
+            <label class="flbl" for="exp">有効期限</label>
+            <input class="finput" type="text" id="exp" inputmode="numeric" placeholder="MM / YY" autocomplete="cc-exp" required>
+          </div>
+          <div class="fitem">
+            <label class="flbl" for="cvc">セキュリティコード</label>
+            <input class="finput" type="text" id="cvc" inputmode="numeric" placeholder="123" autocomplete="cc-csc" required>
+          </div>
+        </div>
+        <div class="fitem">
+          <label class="flbl" for="holder">カード名義</label>
+          <input class="finput" type="text" id="holder" placeholder="TARO YAMADA" autocomplete="cc-name" required>
+        </div>
+        <button type="submit" class="cta" id="payBtn">79,000円を支払う</button>
+        <!-- TODO: Stripe Payment Element ＋ 3Dセキュア2.0（2025/03より原則義務化） -->
+      </div>
+
+      <p class="reassure"><span>🔒</span>カード情報は暗号化して送信・当社サーバーに保存されません（決済はStripeで処理／3Dセキュア2.0対応）</p>
+    </form>
+  </main>
+
+  <!-- =========================================================
+       SCREEN 5 ： 完了
+       ========================================================= -->
+  <main class="screen" id="s-done">
+    <div class="prog">
+      <div class="pstep done"><div class="dot"></div><div class="lbl">プラン</div></div>
+      <div class="pstep done"><div class="dot"></div><div class="lbl">申込情報</div></div>
+      <div class="pstep done"><div class="dot"></div><div class="lbl">契約</div></div>
+      <div class="pstep done"><div class="dot"></div><div class="lbl">決済</div></div>
+      <div class="pstep on"><div class="dot"></div><div class="lbl">完了</div></div>
+    </div>
+
+    <div class="donewrap">
+      <div class="big">✓</div>
+      <h2>お申込みとお支払いが<br>完了しました。</h2>
+      <p>検査キットの発送準備を開始します。</p>
+
+      <div class="stcard hot">
+        <div class="sthead"><span class="stno">最後のステップ</span><span class="sttime">約10秒</span></div>
+        <p class="sttl">LINEで「専用サポート窓口」を追加</p>
+        <ul class="stben">
+          <li><b>検査キット発送の通知</b>をこのトークで受け取れます</li>
+          <li>感染症・精子機能の<b>検査結果について、コンシェルジュに個別相談</b></li>
+          <li>手続き・保管のご質問、領収書・契約書控えの受け取り</li>
+        </ul>
+        <a class="cta line" href="#" style="padding:14px;font-size:15px;border-radius:12px">LINEで窓口を追加する</a>
+        <!-- TODO: LINE友だち追加URL（申込番号・氏名を連携するパラメータ付き）を設定 -->
+        <p class="stmicro">お名前・申込番号は自動で連携されます（入力不要）</p>
+      </div>
+
+      <a class="skiplink" href="#">あとで追加する（発送・結果のご連絡手段が限られます）</a>
+    </div>
+  </main>
+
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var app = document.querySelector('.app');
+
+  /* ---------- ステップ切替 ---------- */
+  var titles = {
+    's-lp'      : '精子凍結みらいバンク<i class="rmark">®</i>',
+    's-form1'   : 'お申込み情報の入力（1/2）',
+    's-form2'   : 'お申込み情報の入力（2/2）',
+    's-contract': '同意・契約',
+    's-pay'     : 'お支払い',
+    's-done'    : 'お申込み完了'
+  };
+  function go(id){
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.toggle('active', s.id === id); });
+    document.getElementById('appTitle').innerHTML = titles[id] || '';
+    window.scrollTo({ top:0, behavior:'auto' });
+    // TODO: ステップ到達をGTM/GA4に送信（dataLayer.push）
+  }
+  app.addEventListener('click', function(e){
+    var t = e.target.closest('[data-go]');
+    if(t){ e.preventDefault(); go(t.dataset.go); }
+  });
+
+  /* ---------- 状態 ---------- */
+  var state = { plan:'検査つき標準プラン', total:79000, name:'' };
+  var yen = function(n){ return n.toLocaleString('ja-JP') + '円'; };
+
+  /* ---------- プラン選択 ---------- */
+  document.querySelectorAll('[data-plan]').forEach(function(b){
+    b.addEventListener('click', function(){
+      state.plan  = b.dataset.plan;
+      state.total = parseInt(b.dataset.total, 10);
+      document.getElementById('planChip2').textContent = state.plan;
+      document.getElementById('cfPlan').textContent    = state.plan + '（1年）';
+      document.getElementById('cfTotal').textContent   = yen(state.total);
+      document.getElementById('paySumPlan').textContent= state.plan + '（1年）';
+      document.getElementById('paySumTotal').innerHTML = yen(state.total) + '<small>（税込）</small>';
+      document.getElementById('payBtn').textContent    = yen(state.total) + 'を支払う';
+      go('s-form1');
+    });
+  });
+
+  /* ---------- 料金を比較する（縦一覧トグル） ---------- */
+  var caro = document.getElementById('caro'), cmp = document.getElementById('cmpBtn');
+  cmp.addEventListener('click', function(){
+    var on = caro.classList.toggle('stacked');
+    cmp.textContent = on ? 'カルーセル表示に戻す ▸' : '料金を比較する（縦一覧で表示）▸';
+    document.getElementById('pdots').style.display = on ? 'none' : 'flex';
+  });
+
+  /* ---------- ドット同期（声・プラン） ---------- */
+  function bindDots(scrollerId, dotsId){
+    var sc = document.getElementById(scrollerId), dots = document.getElementById(dotsId);
+    if(!sc || !dots) return;
+    sc.addEventListener('scroll', function(){
+      var kids = dots.children, n = kids.length;
+      var i = Math.round(sc.scrollLeft / (sc.scrollWidth / n));
+      for(var k=0;k<n;k++) kids[k].classList.toggle('on', k === Math.min(i, n-1));
+    }, { passive:true });
+  }
+  bindDots('vrow','vdots');
+  bindDots('caro','pdots');
+
+  /* ---------- 生年月日セレクト ---------- */
+  function fill(sel, from, to, unit){
+    var s = document.getElementById(sel), h = '<option value="">--</option>';
+    for(var i=from;i<=to;i++) h += '<option value="'+i+'">'+i+unit+'</option>';
+    s.innerHTML = h;
+  }
+  var thisYear = new Date().getFullYear();
+  fill('by', thisYear-70, thisYear-18, '年');   // TODO: 申込可能年齢の下限・上限を要件に合わせて調整
+  fill('bm', 1, 12, '月');
+  fill('bd', 1, 31, '日');
+
+  /* ---------- フリガナ簡易オートカナ ---------- */
+  var nameEl = document.getElementById('name'), kanaEl = document.getElementById('kana');
+  nameEl.addEventListener('input', function(){
+    if(kanaEl.dataset.touched) return;
+    var v = nameEl.value.replace(/[ぁ-ん]/g, function(c){
+      return String.fromCharCode(c.charCodeAt(0) + 0x60);
+    });
+    if(/^[ァ-ヶー\s　]*$/.test(v)) kanaEl.value = v;
+  });
+  kanaEl.addEventListener('input', function(){ kanaEl.dataset.touched = '1'; });
+
+  /* ---------- バリデーション & 遷移 ---------- */
+  function req(form){
+    var first = null;
+    form.querySelectorAll('[required]').forEach(function(el){
+      var bad  = (el.type === 'checkbox') ? !el.checked : !el.value.trim();
+      var mark = (el.type === 'checkbox') ? el.nextElementSibling : el;
+      mark.style.borderColor = bad ? '#D96C2C' : '';
+      if(bad && !first) first = mark;
+    });
+    if(first){
+      first.scrollIntoView({ block:'center', behavior:'smooth' });
+      return false;
+    }
+    return true;
+  }
+
+  document.getElementById('form1').addEventListener('submit', function(e){
+    e.preventDefault();
+    if(!req(this)) return;
+    state.name = nameEl.value.trim();
+    document.getElementById('signName').textContent = state.name;
+    go('s-form2');
+  });
+
+  document.getElementById('form2').addEventListener('submit', function(e){
+    e.preventDefault();
+    if(!req(this)) return;
+    go('s-contract');
+  });
+
+  document.getElementById('form3').addEventListener('submit', function(e){
+    e.preventDefault();
+    if(!req(this)) return;
+    // TODO: 電子署名APIで締結（氏名は自動転記） → 成功後に決済へ
+    go('s-pay');
+  });
+
+  document.getElementById('form4').addEventListener('submit', function(e){
+    e.preventDefault();
+    if(!req(this)) return;
+    // TODO: Stripeで決済 → 成功後に完了画面へ（真のCV地点：ここでCVタグを発火）
+    go('s-done');
+  });
+
+  document.getElementById('walletBtn').addEventListener('click', function(){
+    // TODO: Apple Pay／Google Pay（Stripe Express Checkout）
+    go('s-done');
+  });
+
+  /* ---------- 郵便番号 ---------- */
+  document.getElementById('zipBtn').addEventListener('click', function(){
+    // TODO: 郵便番号→住所API。対象地域判定もここで行い regionChip を更新（対象外なら警告表示）
+    document.getElementById('addr1').focus();
+  });
+})();
+</script>
+</body>
+</html>
